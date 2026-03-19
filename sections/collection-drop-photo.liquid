@@ -6,82 +6,135 @@
     - custom.hero_photo_url  (string) → CDN URL of the source photo
     - custom.hotspots        (json)   → array of hotspot objects
 
-  Hotspot JSON format:
-  [
-    {"left": 19.2, "top": 57.3, "handle": "fayleeko-key-lock-box",
-     "title": "Fayleeko Key Lock Box", "price": "$24.99",
-     "img": "https://cdn.shopify.com/..."},
-    ...
-  ]
-
-  FIX: metafield type=json → use | json filter to emit valid JSON string into <script>
+  Styled to match the homepage shop-the-photo section exactly:
+  full-bleed hero, gradient overlay, inline prev/next arrows.
 {% endcomment %}
 
 {%- assign hero_url      = collection.metafields.custom.hero_photo_url.value -%}
 {%- assign hotspots_data = collection.metafields.custom.hotspots.value -%}
-
-{%- comment -%} Clean display title: remove dashes, strip "Drop " prefix formatting {%- endcomment -%}
 {%- assign display_title = collection.title | remove: '-' -%}
 
+{%- comment -%} Build sorted drop list for prev/next navigation {%- endcomment -%}
+{%- assign drop_nav_data = '' -%}
+{%- assign drop_sep = '|||' -%}
+{%- for col in collections -%}
+  {%- if col.handle contains 'drop-' -%}
+    {%- assign drop_entry = col.handle | append: '::' | append: col.title | append: '::' | append: col.url -%}
+    {%- if drop_nav_data == '' -%}
+      {%- assign drop_nav_data = drop_entry -%}
+    {%- else -%}
+      {%- assign drop_nav_data = drop_nav_data | append: drop_sep | append: drop_entry -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
 <style>
-  .drop-page {
-    background: #fff;
+  /* ── Reset section so it bleeds edge-to-edge with no gaps ── */
+  .cdp-section {
     font-family: Arial, Helvetica, sans-serif;
-    padding-bottom: 60px;
+    background: #fff;
   }
 
-  /* ── Title bar ── */
-  .drop-title-bar {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 24px 24px 12px;
-    border-bottom: 2px solid #000;
-  }
-  .drop-title-bar h1 {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #000;
-    margin: 0;
-  }
-  .drop-title-bar-links {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-  }
-  .drop-title-bar-links a {
-    font-size: 11px;
-    color: #000;
-    text-decoration: underline;
-    letter-spacing: 0.04em;
-  }
-  .drop-title-bar .drop-meta {
-    font-size: 10px;
-    color: #888;
-    letter-spacing: 0.06em;
-  }
-
-  /* ── Photo wrapper ── */
-  .drop-photo-wrapper {
+  /* ── Full-bleed hero wrapper ── */
+  .cdp-photo-wrapper {
     position: relative;
     width: 100%;
+    height: 100vh;
     overflow: hidden;
     background: #111;
     display: block;
   }
-  .drop-hero {
+
+  /* Image fills entire wrapper */
+  .cdp-hero {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: auto;
-    display: block;
-    max-height: 80vh;
+    height: 100%;
     object-fit: cover;
     object-position: center;
+    display: block;
   }
 
-  /* ── HOTSPOT ZONE — large clickable area ── */
-  .drop-hotspot-zone {
+  /* Subtle gradient at top so text is legible over bright photos */
+  .cdp-photo-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.38) 0%,
+      rgba(0,0,0,0.10) 18%,
+      rgba(0,0,0,0) 36%
+    );
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* ── Overlay UI bar at top of hero ── */
+  .cdp-overlay-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+  }
+
+  .cdp-overlay-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .cdp-overlay-title:hover { opacity: 0.8; }
+
+  .cdp-overlay-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .cdp-overlay-links a {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    padding-bottom: 1px;
+  }
+  .cdp-overlay-links a:hover { border-bottom-color: #fff; }
+
+  /* ── Inline prev/next arrows ── */
+  .cdp-nav-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+    padding: 4px;
+    transition: opacity 0.12s, transform 0.12s;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+    flex-shrink: 0;
+    visibility: hidden;
+  }
+  .cdp-nav-arrow:hover { opacity: 0.7; }
+  .cdp-nav-arrow--prev:hover { transform: translateX(-2px); }
+  .cdp-nav-arrow--next:hover { transform: translateX(2px); }
+  .cdp-nav-arrow--disabled {
+    opacity: 0.25;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  /* ── Hotspot zones ── */
+  .cdp-hotspot-zone {
     position: absolute;
     width: 80px;
     height: 80px;
@@ -91,9 +144,7 @@
     text-decoration: none;
     -webkit-tap-highlight-color: rgba(212,2,29,0.2);
   }
-
-  /* Red pulsing dot */
-  .drop-hotspot-zone::before {
+  .cdp-hotspot-zone::before {
     content: '';
     position: absolute;
     top: 50%; left: 50%;
@@ -105,9 +156,7 @@
     transition: transform 0.15s, background 0.15s;
     box-shadow: 0 2px 8px rgba(0,0,0,0.35);
   }
-
-  /* Ripple ring */
-  .drop-hotspot-zone::after {
+  .cdp-hotspot-zone::after {
     content: '';
     position: absolute;
     top: 50%; left: 50%;
@@ -116,27 +165,22 @@
     border-radius: 50%;
     transform: translate(-50%, -50%) scale(1);
     opacity: 0.7;
-    animation: drop-ripple 2s ease-out infinite;
+    animation: cdp-ripple 2s ease-out infinite;
   }
-
-  @keyframes drop-ripple {
-    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.7; }
-    100% { transform: translate(-50%, -50%) scale(2.8); opacity: 0; }
+  @keyframes cdp-ripple {
+    0%   { transform: translate(-50%,-50%) scale(1);   opacity: 0.7; }
+    100% { transform: translate(-50%,-50%) scale(2.8); opacity: 0; }
   }
-
-  .drop-hotspot-zone:hover::before,
-  .drop-hotspot-zone:focus::before {
+  .cdp-hotspot-zone:hover::before,
+  .cdp-hotspot-zone:focus::before {
     transform: translate(-50%, -50%) scale(1.3);
     background: #a80118;
   }
-  .drop-hotspot-zone:hover::after,
-  .drop-hotspot-zone:focus::after {
-    animation: none;
-    opacity: 0;
-  }
+  .cdp-hotspot-zone:hover::after,
+  .cdp-hotspot-zone:focus::after { animation: none; opacity: 0; }
 
-  /* ── Hover label ── */
-  .drop-hotspot-label {
+  /* Hover label */
+  .cdp-hotspot-label {
     position: absolute;
     bottom: calc(50% + 18px);
     left: 50%;
@@ -152,15 +196,11 @@
     padding: 5px 9px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition: opacity 0.15s, transform 0.15s;
     z-index: 30;
   }
-  .drop-hotspot-label span {
-    color: #aaa;
-    margin-left: 6px;
-    font-weight: 400;
-  }
-  .drop-hotspot-label::after {
+  .cdp-hotspot-label span { color: #aaa; margin-left: 6px; font-weight: 400; }
+  .cdp-hotspot-label::after {
     content: '';
     position: absolute;
     top: 100%; left: 50%;
@@ -168,38 +208,18 @@
     border: 5px solid transparent;
     border-top-color: #000;
   }
-  .drop-hotspot-zone:hover .drop-hotspot-label,
-  .drop-hotspot-zone:focus .drop-hotspot-label {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Mobile */
-  @media (max-width: 600px) {
-    .drop-hotspot-zone { width: 64px; height: 64px; }
-    .drop-hotspot-zone::before { width: 18px; height: 18px; }
-    .drop-hero { max-height: 70vw; }
-  }
-
-  /* ── No photo state ── */
-  .drop-no-photo {
-    padding: 60px 24px;
-    text-align: center;
-    font-size: 11px;
-    color: #888;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
+  .cdp-hotspot-zone:hover .cdp-hotspot-label,
+  .cdp-hotspot-zone:focus .cdp-hotspot-label { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ── Product grid ── */
-  .drop-grid-header {
+  .cdp-grid-header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 24px 24px 12px;
+    padding: 28px 24px 12px;
     border-top: 1px solid #e8e8e8;
   }
-  .drop-grid-header h2 {
+  .cdp-grid-header h2 {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -207,40 +227,37 @@
     color: #000;
     margin: 0;
   }
-  .drop-grid-header-links {
-    display: flex;
-    gap: 20px;
-  }
-  .drop-grid-header-links a {
+  .cdp-grid-links { display: flex; gap: 20px; align-items: center; }
+  .cdp-grid-links a {
     font-size: 11px;
     color: #000;
     text-decoration: underline;
     letter-spacing: 0.04em;
   }
-  .drop-product-grid {
+  .cdp-product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 0;
     padding: 0 24px;
   }
-  .drop-product-card {
+  .cdp-product-card {
     padding: 12px 8px;
     text-decoration: none;
     display: block;
     border-right: 1px solid #e8e8e8;
     transition: background 0.1s;
   }
-  .drop-product-card:last-child { border-right: none; }
-  .drop-product-card:hover { background: #f7f7f7; }
-  .drop-product-card img {
+  .cdp-product-card:last-child { border-right: none; }
+  .cdp-product-card:hover { background: #f7f7f7; }
+  .cdp-product-card img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
     display: block;
-    background: #f0f0f0;
+    background: #f5f5f5;
     margin-bottom: 8px;
   }
-  .drop-product-card-title {
+  .cdp-product-card-title {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -249,97 +266,189 @@
     margin: 0 0 3px;
     line-height: 1.3;
   }
-  .drop-product-card-price { font-size: 10px; color: #000; }
+  .cdp-product-card-price { font-size: 10px; color: #000; }
+
+  /* ── No photo state ── */
+  .cdp-no-photo {
+    padding: 60px 24px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 
   @media (max-width: 600px) {
-    .drop-product-grid { grid-template-columns: repeat(2, 1fr); padding: 0 12px; }
+    .cdp-photo-wrapper { height: 100svh; }
+    .cdp-hotspot-zone { width: 64px; height: 64px; }
+    .cdp-hotspot-zone::before { width: 18px; height: 18px; }
+    .cdp-product-grid { grid-template-columns: repeat(2, 1fr); }
+    .cdp-overlay-bar { padding: 16px 16px; }
   }
 </style>
 
-<div class="drop-page">
+<script id="cdp-drop-nav-data" type="application/json">
+{
+  "drops": {{ drop_nav_data | split: drop_sep | json }},
+  "current": {{ collection.handle | json }}
+}
+</script>
 
-  <div class="drop-title-bar">
-    <h1>{{ display_title }}</h1>
-    <div class="drop-title-bar-links">
-      <span class="drop-meta">{{ collection.products_count }} item{% if collection.products_count != 1 %}s{% endif %}</span>
-    </div>
-  </div>
+<section class="cdp-section">
 
   {%- if hero_url != blank -%}
-    <div class="drop-photo-wrapper" id="drop-wrapper">
-      <img class="drop-hero" src="{{ hero_url }}" alt="{{ display_title }}" loading="eager">
+    <div class="cdp-photo-wrapper" id="cdp-wrapper">
+
+      {%- comment -%} Full-bleed hero image {%- endcomment -%}
+      <img class="cdp-hero" src="{{ hero_url }}" alt="{{ display_title }}" loading="eager">
+
+      {%- comment -%} Overlay: prev arrow + drop title + nav links + next arrow {%- endcomment -%}
+      <div class="cdp-overlay-bar">
+        <a class="cdp-nav-arrow cdp-nav-arrow--prev" id="cdp-nav-prev" href="#" aria-label="Previous drop">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+        <span class="cdp-overlay-title">{{ display_title }}</span>
+
+        <div class="cdp-overlay-links">
+          <a href="/pages/drops">View all drops</a>
+          <a href="/collections/all">Shop all</a>
+        </div>
+
+        <a class="cdp-nav-arrow cdp-nav-arrow--next" id="cdp-nav-next" href="#" aria-label="Next drop">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      {%- comment -%} Hotspot data {%- endcomment -%}
       {%- if hotspots_data != blank -%}
-        {%- comment -%}
-          KEY FIX: use `| json` to serialize the Liquid object back to a valid JSON string.
-          Without this, Liquid renders the array as a Ruby-style object, not JSON.
-        {%- endcomment -%}
-        <script id="drop-hotspots-data" type="application/json">{{ hotspots_data | json }}</script>
+        <script id="cdp-hotspots-data" type="application/json">{{ hotspots_data | json }}</script>
       {%- endif -%}
+
     </div>
   {%- else -%}
-    <div class="drop-no-photo">Photo coming soon</div>
+    <div class="cdp-no-photo">Photo coming soon</div>
   {%- endif -%}
 
+  {%- comment -%} Product grid below hero {%- endcomment -%}
   {%- if collection.products_count > 0 -%}
-    <div class="drop-grid-header">
-      <h2>Items in this drop</h2>
-      <div class="drop-grid-header-links">
-        <a href="/pages/drops">All drops</a>
+    <div class="cdp-grid-header">
+      <h2>{{ display_title }}</h2>
+      <div class="cdp-grid-links">
+        <a href="/pages/drops">View all drops</a>
         <a href="/collections/all">Shop all</a>
       </div>
     </div>
-    <div class="drop-product-grid">
+    <div class="cdp-product-grid">
       {%- for product in collection.products -%}
-        <a href="{{ product.url }}" class="drop-product-card">
+        <a href="{{ product.url }}" class="cdp-product-card">
           {%- if product.featured_image -%}
             <img src="{{ product.featured_image | image_url: width: 400 }}" alt="{{ product.title | escape }}" loading="lazy">
           {%- else -%}
             <div style="width:100%;aspect-ratio:1;background:#f0f0f0;"></div>
           {%- endif -%}
-          <p class="drop-product-card-title">{{ product.title }}</p>
-          <p class="drop-product-card-price">{{ product.price | money }}</p>
+          <p class="cdp-product-card-title">{{ product.title }}</p>
+          <p class="cdp-product-card-price">{{ product.price | money }}</p>
         </a>
       {%- endfor -%}
     </div>
   {%- endif -%}
 
-</div>
+</section>
 
-{%- if hero_url != blank -%}
 <script>
+/* Hotspots */
 (function() {
-  var wrapper = document.getElementById('drop-wrapper');
-  var dataEl  = document.getElementById('drop-hotspots-data');
+  var wrapper = document.getElementById('cdp-wrapper');
+  var dataEl  = document.getElementById('cdp-hotspots-data');
   if (!wrapper || !dataEl) return;
 
   var hotspots;
-  try {
-    var raw = dataEl.textContent.trim();
-    hotspots = JSON.parse(raw);
-  } catch(e) {
-    console.warn('Overflow: could not parse hotspots JSON', e);
-    return;
-  }
+  try { hotspots = JSON.parse(dataEl.textContent.trim()); }
+  catch(e) { console.warn('Overflow: hotspot parse error', e); return; }
   if (!Array.isArray(hotspots) || hotspots.length === 0) return;
 
   hotspots.forEach(function(hs) {
     var zone = document.createElement('a');
-    zone.className  = 'drop-hotspot-zone';
+    zone.className  = 'cdp-hotspot-zone';
     zone.href       = '/products/' + hs.handle;
     zone.style.left = hs.left + '%';
     zone.style.top  = hs.top  + '%';
     zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
 
     var label = document.createElement('span');
-    label.className = 'drop-hotspot-label';
+    label.className = 'cdp-hotspot-label';
     label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
     zone.appendChild(label);
-
     wrapper.appendChild(zone);
   });
 })();
 </script>
-{%- endif -%}
+
+<script>
+/* Drop nav arrows (inline in overlay bar) */
+(function() {
+  var dataEl = document.getElementById('cdp-drop-nav-data');
+  if (!dataEl) return;
+
+  var data;
+  try { data = JSON.parse(dataEl.textContent.trim()); }
+  catch(e) { return; }
+
+  var rawDrops = data.drops;
+  var current  = data.current;
+  if (!rawDrops || rawDrops.length === 0) return;
+
+  var drops = rawDrops.map(function(d) {
+    var parts = d.split('::');
+    return { handle: parts[0], title: parts[1], url: parts[2] };
+  });
+  drops.sort(function(a, b) { return a.handle < b.handle ? -1 : 1; });
+
+  var idx = drops.findIndex(function(d) { return d.handle === current; });
+  if (idx === -1) idx = drops.length - 1;
+
+  var prevEl = document.getElementById('cdp-nav-prev');
+  var nextEl = document.getElementById('cdp-nav-next');
+
+  if (idx > 0) {
+    prevEl.href = drops[idx - 1].url;
+    prevEl.style.visibility = 'visible';
+  } else {
+    prevEl.classList.add('cdp-nav-arrow--disabled');
+    prevEl.style.visibility = 'visible';
+  }
+
+  if (idx < drops.length - 1) {
+    nextEl.href = drops[idx + 1].url;
+    nextEl.style.visibility = 'visible';
+  } else {
+    nextEl.classList.add('cdp-nav-arrow--disabled');
+    nextEl.style.visibility = 'visible';
+  }
+
+  /* Swipe support */
+  var wrapper = document.getElementById('cdp-wrapper');
+  if (wrapper) {
+    var touchStartX = null;
+    wrapper.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    wrapper.addEventListener('touchend', function(e) {
+      if (touchStartX === null) return;
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(dx) < 50) return;
+      if (dx < 0 && idx < drops.length - 1) window.location.href = drops[idx + 1].url;
+      else if (dx > 0 && idx > 0) window.location.href = drops[idx - 1].url;
+    }, { passive: true });
+  }
+})();
+</script>
 
 {% schema %}
 {
