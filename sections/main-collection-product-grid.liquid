@@ -157,22 +157,40 @@
   {%- comment -%} ── Left Sidebar Category Nav ── {%- endcomment -%}
   <aside class="supreme-sidebar" aria-label="Categories">
     <nav class="supreme-sidebar__nav">
-      {%- liquid
-        assign categories = 'new,cameras,tools,electronics,kitchen,accessories,all' | split: ','
-        assign handles    = 'new,cameras,tools,electronics,kitchen,accessories,all' | split: ','
-      -%}
-      {%- for cat in categories -%}
-        {%- assign handle = handles[forloop.index0] -%}
-        {%- assign cat_url = '/collections/' | append: handle -%}
-        {%- assign is_active = false -%}
-        {%- if collection.handle == handle -%}
-          {%- assign is_active = true -%}
-        {%- endif -%}
-        <a
-          href="{{ cat_url }}"
-          class="supreme-sidebar__link{% if is_active %} supreme-sidebar__link--active{% endif %}"
-        >{{ cat }}</a>
+      {%- comment -%}
+        Dynamic sidebar: always show NEW first, then any collection that
+        isn't a drop-* collection and isn't the reserved system handles
+        (frontpage, staff-picks, home-page), then ALL last.
+        New descriptive collections (e.g. "Workshop Desk", "Camera Gear")
+        created per photo drop will appear here automatically.
+      {%- endcomment -%}
+
+      {%- assign system_handles = 'new,all,frontpage,staff-picks,home-page' | split: ',' -%}
+
+      {%- comment -%} 1. NEW always first {%- endcomment -%}
+      <a href="/collections/new"
+        class="supreme-sidebar__link{% if collection.handle == 'new' %} supreme-sidebar__link--active{% endif %}"
+      >NEW</a>
+
+      {%- comment -%} 2. Dynamic descriptive collections (skip drop-* and system handles) {%- endcomment -%}
+      {%- for col in collections -%}
+        {%- assign h = col.handle -%}
+        {%- assign skip = false -%}
+        {%- if h contains 'drop-' -%}{%- assign skip = true -%}{%- endif -%}
+        {%- for sys in system_handles -%}
+          {%- if h == sys -%}{%- assign skip = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- unless skip -%}
+          <a href="{{ col.url }}"
+            class="supreme-sidebar__link{% if collection.handle == h %} supreme-sidebar__link--active{% endif %}"
+          >{{ col.title | upcase }}</a>
+        {%- endunless -%}
       {%- endfor -%}
+
+      {%- comment -%} 3. ALL always last {%- endcomment -%}
+      <a href="/collections/all"
+        class="supreme-sidebar__link{% if collection.handle == 'all' %} supreme-sidebar__link--active{% endif %}"
+      >ALL</a>
     </nav>
   </aside>
 
@@ -285,3 +303,4 @@
   ]
 }
 {% endschema %}
+
