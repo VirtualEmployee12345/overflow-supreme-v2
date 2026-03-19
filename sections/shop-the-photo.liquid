@@ -310,71 +310,21 @@
   }
   if (!Array.isArray(hotspots) || hotspots.length === 0) return;
 
-  function placeHotspots() {
-    // Remove any previously placed zones
-    wrapper.querySelectorAll('.stp-hotspot-zone').forEach(function(z) { z.remove(); });
+  hotspots.forEach(function(hs) {
+    var zone = document.createElement('a');
+    zone.className  = 'stp-hotspot-zone';
+    zone.href       = '/products/' + hs.handle;
+    zone.style.left = hs.left + '%';
+    zone.style.top  = hs.top  + '%';
+    zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
 
-    var img = wrapper.querySelector('.stp-hero');
-    if (!img) return;
+    var label = document.createElement('span');
+    label.className = 'stp-hotspot-label';
+    label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
+    zone.appendChild(label);
 
-    var wRect = wrapper.getBoundingClientRect();
-    var wW = wRect.width;
-    var wH = wRect.height;
-
-    var nW = img.naturalWidth  || 1920;
-    var nH = img.naturalHeight || 1080;
-
-    // Compute object-fit: cover rendered region within the wrapper
-    // Scale to cover: pick the larger of (wW/nW) and (wH/nH)
-    var scaleX = wW / nW;
-    var scaleY = wH / nH;
-    var scale  = Math.max(scaleX, scaleY);
-
-    var renderedW = nW * scale;
-    var renderedH = nH * scale;
-
-    // object-position: center — offset of image top-left within wrapper
-    var offsetX = (wW - renderedW) / 2;
-    var offsetY = (wH - renderedH) / 2;
-
-    hotspots.forEach(function(hs) {
-      // hs.left / hs.top are percentages of the ORIGINAL image dimensions
-      var origX = hs.left / 100 * nW;  // pixel in original image
-      var origY = hs.top  / 100 * nH;
-
-      // Map to rendered image position within wrapper
-      var dotX = offsetX + origX * scale;  // px from wrapper left
-      var dotY = offsetY + origY * scale;  // px from wrapper top
-
-      // Convert to percentage of wrapper
-      var leftPct = dotX / wW * 100;
-      var topPct  = dotY / wH * 100;
-
-      var zone = document.createElement('a');
-      zone.className  = 'stp-hotspot-zone';
-      zone.href       = '/products/' + hs.handle;
-      zone.style.left = leftPct + '%';
-      zone.style.top  = topPct  + '%';
-      zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
-
-      var label = document.createElement('span');
-      label.className = 'stp-hotspot-label';
-      label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
-      zone.appendChild(label);
-
-      wrapper.appendChild(zone);
-    });
-  }
-
-  // Place on load and re-place on resize
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', placeHotspots);
-  } else {
-    placeHotspots();
-  }
-  var img = wrapper.querySelector('.stp-hero');
-  if (img && !img.complete) { img.addEventListener('load', placeHotspots); }
-  window.addEventListener('resize', placeHotspots);
+    wrapper.appendChild(zone);
+  });
 })();
 </script>
 
