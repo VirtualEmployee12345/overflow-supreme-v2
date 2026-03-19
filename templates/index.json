@@ -6,9 +6,14 @@
         "heading": "Shop the photo",
         "photo_url": "https://cdn.shopify.com/s/files/1/0648/8988/0637/files/IMG_8292.jpg?v=1773951570"
       }
+    },
+    "drop_nav": {
+      "type": "drop-nav",
+      "settings": {}
     }
   },
   "order": [
+    "drop_nav",
     "shop_the_photo"
   ]
 }

@@ -3,9 +3,14 @@
     "drop_photo": {
       "type": "collection-drop-photo",
       "settings": {}
+    },
+    "drop_nav": {
+      "type": "drop-nav",
+      "settings": {}
     }
   },
   "order": [
+    "drop_nav",
     "drop_photo"
   ]
 }

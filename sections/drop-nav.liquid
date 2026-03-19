@@ -1,0 +1,224 @@
+{% comment %}
+  drop-nav.liquid
+  
+  Prev / Next arrows to navigate between drops in chronological order.
+  Works on both:
+    - Homepage (index) — shows latest drop, arrows navigate to adjacent drops
+    - Drop collection pages (collection.drop template)
+  
+  Logic:
+  - Builds a sorted list of all drop-* collections by handle
+  - Finds current position (by collection.handle on drop pages, or latest drop on homepage)
+  - Renders ← prev and next → anchors
+{% endcomment %}
+
+{%- comment -%} Build sorted drop list {%- endcomment -%}
+{%- assign drop_handles = '' -%}
+{%- assign drop_titles  = '' -%}
+{%- assign sep = '|||' -%}
+
+{%- comment -%}
+  Liquid can't sort arrays natively. We collect all drop handles into a string,
+  then sort client-side. Server renders all links; JS shows only prev/next.
+{%- endcomment -%}
+
+{%- assign all_drops_data = '' -%}
+{%- for col in collections -%}
+  {%- if col.handle contains 'drop-' -%}
+    {%- assign entry = col.handle | append: '::' | append: col.title | append: '::' | append: col.url -%}
+    {%- if all_drops_data == '' -%}
+      {%- assign all_drops_data = entry -%}
+    {%- else -%}
+      {%- assign all_drops_data = all_drops_data | append: sep | append: entry -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} Determine current drop handle {%- endcomment -%}
+{%- if collection.handle contains 'drop-' -%}
+  {%- assign current_drop_handle = collection.handle -%}
+{%- else -%}
+  {%- comment -%} Homepage: find latest drop {%- endcomment -%}
+  {%- assign current_drop_handle = '' -%}
+  {%- for col in collections -%}
+    {%- if col.handle contains 'drop-' -%}
+      {%- if col.handle > current_drop_handle -%}
+        {%- assign current_drop_handle = col.handle -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+<style>
+  .drop-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 44px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    position: relative;
+    z-index: 5;
+  }
+
+  .drop-nav__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000;
+    text-decoration: none;
+    padding: 8px 0;
+    transition: color 0.12s;
+    min-width: 120px;
+  }
+  .drop-nav__btn:hover { color: #d4021d; }
+  .drop-nav__btn--next { justify-content: flex-end; text-align: right; }
+  .drop-nav__btn--disabled {
+    color: #ccc;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .drop-nav__arrow {
+    display: block;
+    flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+  .drop-nav__btn--prev:hover .drop-nav__arrow { transform: translateX(-3px); }
+  .drop-nav__btn--next:hover .drop-nav__arrow { transform: translateX(3px); }
+
+  .drop-nav__center {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    text-align: center;
+  }
+
+  /* Hide buttons server-side; JS reveals correct ones */
+  .drop-nav__btn { visibility: hidden; }
+</style>
+
+{%- comment -%} Emit the drops data for JS {%- endcomment -%}
+<script id="drop-nav-data" type="application/json">
+{
+  "drops": {{ all_drops_data | split: sep | json }},
+  "current": {{ current_drop_handle | json }}
+}
+</script>
+
+<nav class="drop-nav" aria-label="Browse drops">
+  <a class="drop-nav__btn drop-nav__btn--prev" id="drop-nav-prev" href="#" aria-label="Previous drop">
+    <svg class="drop-nav__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span id="drop-nav-prev-label">prev</span>
+  </a>
+
+  <span class="drop-nav__center" id="drop-nav-counter"></span>
+
+  <a class="drop-nav__btn drop-nav__btn--next" id="drop-nav-next" href="#" aria-label="Next drop">
+    <span id="drop-nav-next-label">next</span>
+    <svg class="drop-nav__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</nav>
+
+<script>
+(function() {
+  var dataEl = document.getElementById('drop-nav-data');
+  if (!dataEl) return;
+
+  var data;
+  try { data = JSON.parse(dataEl.textContent.trim()); }
+  catch(e) { return; }
+
+  var rawDrops  = data.drops;   // array of "handle::title::url" strings
+  var current   = data.current;
+
+  if (!rawDrops || rawDrops.length === 0) return;
+
+  // Parse each entry
+  var drops = rawDrops.map(function(d) {
+    var parts = d.split('::');
+    return { handle: parts[0], title: parts[1].replace(/-/g, ' '), url: parts[2] };
+  });
+
+  // Sort chronologically by handle (lexicographic works for drop-YYYY-MM-DD*)
+  drops.sort(function(a, b) { return a.handle < b.handle ? -1 : 1; });
+
+  var idx = drops.findIndex(function(d) { return d.handle === current; });
+  if (idx === -1) idx = drops.length - 1; // fallback to latest
+
+  var prevEl      = document.getElementById('drop-nav-prev');
+  var nextEl      = document.getElementById('drop-nav-next');
+  var prevLabel   = document.getElementById('drop-nav-prev-label');
+  var nextLabel   = document.getElementById('drop-nav-next-label');
+  var counterEl   = document.getElementById('drop-nav-counter');
+
+  // Counter
+  if (counterEl) counterEl.textContent = (idx + 1) + ' / ' + drops.length;
+
+  // Prev
+  if (idx > 0) {
+    var prev = drops[idx - 1];
+    prevEl.href = prev.url;
+    prevLabel.textContent = prev.title;
+    prevEl.style.visibility = 'visible';
+  } else {
+    prevEl.classList.add('drop-nav__btn--disabled');
+    prevEl.style.visibility = 'visible';
+    prevLabel.textContent = '';
+  }
+
+  // Next
+  if (idx < drops.length - 1) {
+    var next = drops[idx + 1];
+    nextEl.href = next.url;
+    nextLabel.textContent = next.title;
+    nextEl.style.visibility = 'visible';
+  } else {
+    nextEl.classList.add('drop-nav__btn--disabled');
+    nextEl.style.visibility = 'visible';
+    nextLabel.textContent = '';
+  }
+
+  // Swipe support (touch)
+  var wrapper = document.querySelector('.stp-photo-wrapper, .drop-photo-wrapper');
+  if (wrapper) {
+    var touchStartX = null;
+    wrapper.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    wrapper.addEventListener('touchend', function(e) {
+      if (touchStartX === null) return;
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(dx) < 50) return; // threshold
+      if (dx < 0 && idx < drops.length - 1) {
+        window.location.href = drops[idx + 1].url; // swipe left → next
+      } else if (dx > 0 && idx > 0) {
+        window.location.href = drops[idx - 1].url; // swipe right → prev
+      }
+    }, { passive: true });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Drop Navigator",
+  "tag": "section",
+  "class": "section-drop-nav",
+  "settings": [],
+  "presets": [{"name": "Drop Navigator"}]
+}
+{% endschema %}

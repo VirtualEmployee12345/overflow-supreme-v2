@@ -378,5 +378,50 @@
     {%- if settings.cart_type == 'drawer' -%}
       <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
+  {%- comment -%} Product image lightbox {%- endcomment -%}
+  {%- if request.page_type == 'product' -%}
+  <div class="overflow-lightbox" id="overflow-lightbox" role="dialog" aria-modal="true" aria-label="Product image">
+    <button class="overflow-lightbox__close" id="overflow-lightbox-close" aria-label="Close">&times;</button>
+    <img src="" alt="" id="overflow-lightbox-img">
+  </div>
+  <script>
+  (function() {
+    var lb    = document.getElementById('overflow-lightbox');
+    var lbImg = document.getElementById('overflow-lightbox-img');
+    var lbClose = document.getElementById('overflow-lightbox-close');
+    if (!lb || !lbImg) return;
+
+    function openLightbox(src, alt) {
+      lbImg.src = src;
+      lbImg.alt = alt || '';
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Attach to all product media images
+    document.addEventListener('click', function(e) {
+      var img = e.target.closest('.product__media img');
+      if (img) {
+        e.preventDefault();
+        // Use the largest available src
+        var src = img.src.replace(/_(\d+)x(\d+)\./, '_1600x.');
+        openLightbox(src, img.alt);
+      }
+    });
+
+    lb.addEventListener('click', function(e) {
+      if (e.target === lb || e.target === lbClose) closeLightbox();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  })();
+  </script>
+  {%- endif -%}
+
   </body>
 </html>

@@ -548,3 +548,160 @@ footer a:hover { text-decoration: underline !important; }
   margin: 0 0 0 8px !important;
   float: right !important;
 }
+
+/* ═══════════════════════════════════════════════
+   PRODUCT PAGE — Supreme minimal layout
+   Description + buy button top, large image below
+═══════════════════════════════════════════════ */
+
+/* Stack layout on product page — info above, media below */
+.product__media-wrapper {
+  order: 2 !important;
+}
+.product__info-wrapper {
+  order: 1 !important;
+}
+
+/* On desktop: keep side-by-side but make info column narrower */
+@media screen and (min-width: 750px) {
+  .product__grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0 !important;
+    align-items: start;
+  }
+  /* Override Dawn's sticky info */
+  .product__info-wrapper.product__column-sticky {
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+/* Full-bleed image — remove Dawn's max-width constraints */
+.product__media-list {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.product__media {
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+.product__media img,
+.product__media .product__media--image {
+  width: 100% !important;
+  max-height: none !important;
+  cursor: zoom-in;
+}
+
+/* Make image clickable — zoom on click via lightbox-style overlay */
+.product__media a,
+.product__media button.product__media-toggle {
+  display: block;
+  width: 100%;
+}
+.product__media img {
+  transition: transform 0.3s ease;
+}
+.product__media img:hover {
+  transform: scale(1.02);
+}
+
+/* Product info area — Supreme typography */
+.product__info-container {
+  padding: 24px !important;
+  border-bottom: none !important;
+}
+.product__title {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 8px !important;
+}
+.price__container .price,
+.price__container .price--large {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Add to cart button */
+.product-form__submit {
+  background: #d4021d !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  padding: 14px 28px !important;
+  cursor: pointer;
+  transition: background 0.15s !important;
+}
+.product-form__submit:hover {
+  background: #a80118 !important;
+}
+
+/* Collapsible tabs — shipping etc */
+.accordion__summary {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 14px 24px !important;
+  border-top: 1px solid #e8e8e8 !important;
+  background: none !important;
+}
+.accordion__content,
+.accordion__content p {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 11px !important;
+  color: #444 !important;
+  padding: 0 24px 16px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Image lightbox overlay — clicking product image expands it */
+.overflow-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 9999;
+  cursor: zoom-out;
+  align-items: center;
+  justify-content: center;
+}
+.overflow-lightbox.open {
+  display: flex;
+}
+.overflow-lightbox img {
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+}
+.overflow-lightbox__close {
+  position: fixed;
+  top: 20px; right: 24px;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  line-height: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Drop nav bar */
+.drop-nav {
+  border-bottom: 1px solid #e8e8e8;
+}
+
