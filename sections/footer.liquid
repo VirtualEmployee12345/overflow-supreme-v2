@@ -8,13 +8,11 @@
   <div class="footer-brutalist__inner">
     <div class="footer-brutalist__primary">
       <a href="/" class="footer-brutalist__link{% if request.path == '/' %} footer-brutalist__link--active{% endif %}">home</a>
-      <a href="/pages/drops" class="footer-brutalist__link{% if request.path contains 'drops' %} footer-brutalist__link--active{% endif %}">drops</a>
-      <a href="/collections/all" class="footer-brutalist__link{% if collection.handle == 'all' %} footer-brutalist__link--active{% endif %}">view all</a>
+      <a href="/pages/drops" class="footer-brutalist__link{% if request.path contains 'drops' %} footer-brutalist__link--active{% endif %}">view all drops</a>
+      <a href="/collections/all" class="footer-brutalist__link{% if collection.handle == 'all' %} footer-brutalist__link--active{% endif %}">shop all</a>
     </div>
 
     <div class="footer-brutalist__secondary">
-      <a href="/collections/electronics" class="footer-brutalist__link">electronics</a>
-      <a href="/collections/kitchen" class="footer-brutalist__link">kitchen</a>
       <a href="/pages/about" class="footer-brutalist__link">about</a>
       <a href="/pages/contact" class="footer-brutalist__link">contact</a>
     </div>
