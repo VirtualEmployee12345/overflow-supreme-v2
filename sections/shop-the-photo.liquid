@@ -111,6 +111,28 @@
   }
   .stp-overlay-links a:hover { border-bottom-color: #fff; }
 
+  /* ── Inline prev/next arrows ── */
+  .stp-nav-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+    padding: 4px;
+    transition: opacity 0.12s, transform 0.12s;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+    flex-shrink: 0;
+    visibility: hidden;
+  }
+  .stp-nav-arrow:hover { opacity: 0.7; }
+  .stp-nav-arrow--prev:hover { transform: translateX(-2px); }
+  .stp-nav-arrow--next:hover { transform: translateX(2px); }
+  .stp-nav-arrow--disabled {
+    opacity: 0.25;
+    pointer-events: none;
+    cursor: default;
+  }
+
   /* ── Hotspot zones ── */
   .stp-hotspot-zone {
     position: absolute;
@@ -263,13 +285,46 @@
       {%- comment -%} Full-bleed hero image {%- endcomment -%}
       <img class="stp-hero" src="{{ hero_url }}" alt="{{ drop_title }}" loading="eager">
 
-      {%- comment -%} Overlay: drop title + nav links {%- endcomment -%}
+      {%- comment -%} Overlay: prev arrow + drop title + nav links + next arrow {%- endcomment -%}
+      {%- comment -%} Build sorted drop list for prev/next navigation {%- endcomment -%}
+      {%- assign stp_all_drops_data = '' -%}
+      {%- assign stp_sep = '|||' -%}
+      {%- for col in collections -%}
+        {%- if col.handle contains 'drop-' -%}
+          {%- assign stp_entry = col.handle | append: '::' | append: col.title | append: '::' | append: col.url -%}
+          {%- if stp_all_drops_data == '' -%}
+            {%- assign stp_all_drops_data = stp_entry -%}
+          {%- else -%}
+            {%- assign stp_all_drops_data = stp_all_drops_data | append: stp_sep | append: stp_entry -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <script id="stp-drop-nav-data" type="application/json">
+      {
+        "drops": {{ stp_all_drops_data | split: stp_sep | json }},
+        "current": {{ latest_handle | json }}
+      }
+      </script>
+
       <div class="stp-overlay-bar">
+        <a class="stp-nav-arrow stp-nav-arrow--prev" id="stp-nav-prev" href="#" aria-label="Previous drop">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
         <a class="stp-overlay-title" href="{{ drop_url }}">{{ drop_title }}</a>
+
         <div class="stp-overlay-links">
           <a href="/pages/drops">View all drops</a>
           <a href="/collections/all">Shop all</a>
         </div>
+
+        <a class="stp-nav-arrow stp-nav-arrow--next" id="stp-nav-next" href="#" aria-label="Next drop">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
       </div>
 
       {%- comment -%} Hotspot data {%- endcomment -%}
@@ -332,6 +387,67 @@
 })();
 </script>
 
+<script>
+/* Drop nav arrows (inline in overlay bar) */
+(function() {
+  var dataEl = document.getElementById('stp-drop-nav-data');
+  if (!dataEl) return;
+
+  var data;
+  try { data = JSON.parse(dataEl.textContent.trim()); }
+  catch(e) { return; }
+
+  var rawDrops = data.drops;
+  var current  = data.current;
+  if (!rawDrops || rawDrops.length === 0) return;
+
+  var drops = rawDrops.map(function(d) {
+    var parts = d.split('::');
+    return { handle: parts[0], title: parts[1], url: parts[2] };
+  });
+  drops.sort(function(a, b) { return a.handle < b.handle ? -1 : 1; });
+
+  var idx = drops.findIndex(function(d) { return d.handle === current; });
+  if (idx === -1) idx = drops.length - 1;
+
+  var prevEl = document.getElementById('stp-nav-prev');
+  var nextEl = document.getElementById('stp-nav-next');
+
+  if (idx > 0) {
+    prevEl.href = drops[idx - 1].url;
+    prevEl.style.visibility = 'visible';
+  } else {
+    prevEl.classList.add('stp-nav-arrow--disabled');
+    prevEl.style.visibility = 'visible';
+  }
+
+  if (idx < drops.length - 1) {
+    nextEl.href = drops[idx + 1].url;
+    nextEl.style.visibility = 'visible';
+  } else {
+    nextEl.classList.add('stp-nav-arrow--disabled');
+    nextEl.style.visibility = 'visible';
+  }
+
+  /* Swipe support */
+  var wrapper = document.getElementById('stp-wrapper');
+  if (wrapper) {
+    var touchStartX = null;
+    wrapper.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    wrapper.addEventListener('touchend', function(e) {
+      if (touchStartX === null) return;
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(dx) < 50) return;
+      if (dx < 0 && idx < drops.length - 1) window.location.href = drops[idx + 1].url;
+      else if (dx > 0 && idx > 0) window.location.href = drops[idx - 1].url;
+    }, { passive: true });
+  }
+})();
+</script>
+
 {% schema %}
 {
   "name": "Shop the Photo",
@@ -355,3 +471,4 @@
   "presets": [{"name": "Shop the Photo"}]
 }
 {% endschema %}
+
