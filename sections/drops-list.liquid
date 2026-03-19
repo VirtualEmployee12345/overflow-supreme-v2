@@ -1,0 +1,297 @@
+{% comment %}
+  drops-list.liquid
+  
+  Vertical list of all drop collections.
+  - Each row = drop title (left) + item count (right)
+  - Hovering a row reveals the drop's hero photo in a fixed-position preview panel
+  - Clicking a row navigates to /collections/{handle}
+  - New drops appear automatically as long as their handle starts with "drop-"
+  
+  Hero photos are stored in collection metafield: custom.hero_photo_url
+  Fallback: uses collection.image if metafield not set
+{% endcomment %}
+
+<style>
+  .drops-list-section {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 60vh;
+  }
+
+  /* ── Page header ── */
+  .drops-list-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 32px 24px 0;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+  }
+  .drops-list-header h1 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #000;
+    margin: 0;
+  }
+  .drops-list-header span {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── List ── */
+  .drops-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .drops-list__item {
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .drops-list__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.1s;
+    position: relative;
+  }
+
+  .drops-list__link:hover,
+  .drops-list__link:focus {
+    background: #f7f7f7;
+  }
+
+  .drops-list__name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #000;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Red indicator dot for newest drop */
+  .drops-list__new-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #d4021d;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .drops-list__meta {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .drops-list__count {
+    font-size: 10px;
+    color: #888;
+  }
+
+  /* Arrow that appears on hover */
+  .drops-list__arrow {
+    font-size: 14px;
+    color: #d4021d;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.12s, transform 0.12s;
+    line-height: 1;
+  }
+  .drops-list__link:hover .drops-list__arrow,
+  .drops-list__link:focus .drops-list__arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── Floating image preview ── */
+  .drops-preview {
+    position: fixed;
+    top: 50%;
+    right: 60px;
+    transform: translateY(-50%) scale(0.95);
+    width: 380px;
+    max-width: 38vw;
+    aspect-ratio: 4/3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 200;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  }
+  .drops-preview.visible {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  .drops-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Label overlay on preview */
+  .drops-preview__label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+  }
+
+  /* ── Empty state ── */
+  .drops-list__empty {
+    padding: 60px 24px;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Hide preview on mobile — not enough space */
+  @media (max-width: 768px) {
+    .drops-preview { display: none; }
+    .drops-list__link { height: 64px; }
+    .drops-list__name { font-size: 12px; }
+  }
+</style>
+
+{%- comment -%} Collect all drop collections — handle must start with "drop-" {%- endcomment -%}
+{%- assign drop_collections = '' -%}
+{%- assign all_collections = collections -%}
+
+<div class="drops-list-section">
+  <div class="drops-list-header">
+    <h1>All drops</h1>
+    <span id="drops-list-count"></span>
+  </div>
+
+  {%- assign drop_count = 0 -%}
+  {%- assign drop_index = 0 -%}
+
+  {%- comment -%}
+    Shopify Liquid can't filter collections by handle prefix dynamically,
+    so we render all collections and use CSS/JS to show only drops.
+    We hide non-drop collections server-side with a Liquid check.
+  {%- endcomment -%}
+
+  <ul class="drops-list" id="drops-list">
+    {%- for col in collections -%}
+      {%- if col.handle contains 'drop-' -%}
+        {%- assign drop_count = drop_count | plus: 1 -%}
+        {%- assign hero_url = col.metafields.custom.hero_photo_url.value -%}
+        {%- if hero_url == blank and col.image -%}
+          {%- assign hero_url = col.image | image_url: width: 800 -%}
+        {%- endif -%}
+        <li class="drops-list__item">
+          <a
+            class="drops-list__link"
+            href="{{ col.url }}"
+            data-hero="{{ hero_url }}"
+            data-title="{{ col.title | escape }}"
+          >
+            <span class="drops-list__name">
+              {%- if drop_index == 0 -%}
+                <span class="drops-list__new-dot" title="Latest drop"></span>
+              {%- endif -%}
+              {{ col.title }}
+            </span>
+            <span class="drops-list__meta">
+              <span class="drops-list__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
+              <span class="drops-list__arrow">→</span>
+            </span>
+          </a>
+        </li>
+        {%- assign drop_index = drop_index | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if drop_count == 0 -%}
+      <li class="drops-list__empty">No drops yet — check back soon.</li>
+    {%- endif -%}
+  </ul>
+</div>
+
+{%- comment -%} Floating preview panel — populated by JS {%- endcomment -%}
+<div class="drops-preview" id="drops-preview" aria-hidden="true">
+  <img src="" alt="" id="drops-preview-img" loading="lazy">
+  <div class="drops-preview__label" id="drops-preview-label"></div>
+</div>
+
+<script>
+(function() {
+  // Update the count label
+  var countEl = document.getElementById('drops-list-count');
+  var listEl  = document.getElementById('drops-list');
+  if (countEl && listEl) {
+    var n = listEl.querySelectorAll('.drops-list__item').length;
+    countEl.textContent = n + ' drop' + (n !== 1 ? 's' : '');
+  }
+
+  // Hover preview
+  var preview   = document.getElementById('drops-preview');
+  var previewImg= document.getElementById('drops-preview-img');
+  var previewLbl= document.getElementById('drops-preview-label');
+  if (!preview || !previewImg || !previewLbl) return;
+
+  var links = document.querySelectorAll('.drops-list__link[data-hero]');
+  var hideTimer;
+
+  links.forEach(function(link) {
+    link.addEventListener('mouseenter', function() {
+      clearTimeout(hideTimer);
+      var hero  = link.getAttribute('data-hero');
+      var title = link.getAttribute('data-title');
+      if (!hero) return;
+
+      // Swap image only if changed (avoid flicker)
+      if (previewImg.src !== hero) {
+        previewImg.src = hero;
+        previewImg.alt = title;
+      }
+      previewLbl.textContent = title;
+      preview.classList.add('visible');
+      preview.removeAttribute('aria-hidden');
+    });
+
+    link.addEventListener('mouseleave', function() {
+      hideTimer = setTimeout(function() {
+        preview.classList.remove('visible');
+        preview.setAttribute('aria-hidden', 'true');
+      }, 80);
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Drops List",
+  "tag": "section",
+  "class": "section-drops-list",
+  "settings": [],
+  "presets": [{"name": "Drops List"}]
+}
+{% endschema %}

@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "drops_list": {
+      "type": "drops-list",
+      "settings": {}
+    }
+  },
+  "order": [
+    "drops_list"
+  ]
+}

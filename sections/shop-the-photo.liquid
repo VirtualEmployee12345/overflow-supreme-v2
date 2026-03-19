@@ -37,6 +37,11 @@
     text-decoration: underline;
     letter-spacing: 0.04em;
   }
+  .stp-header-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
 
   /* ---- Photo Wrapper ---- */
   .stp-photo-wrapper {
@@ -259,7 +264,10 @@
   {% if section.settings.heading != blank %}
   <div class="stp-header">
     <h2>{{ section.settings.heading }}</h2>
-    <a href="/collections/all">Shop all</a>
+    <div class="stp-header-links">
+      <a href="/pages/drops">All drops</a>
+      <a href="/collections/all">Shop all</a>
+    </div>
   </div>
   {% endif %}
 
