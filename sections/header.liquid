@@ -26,15 +26,9 @@
     {%- endif -%}
 
     <nav class="header-brutalist__nav" aria-label="Primary">
-      <a href="/collections/new" class="header-brutalist__link{% if collection.handle == 'new' %} header-brutalist__link--active{% endif %}">new</a>
-      <a href="/collections/cameras" class="header-brutalist__link{% if collection.handle == 'cameras' %} header-brutalist__link--active{% endif %}">cameras</a>
-      <a href="/collections/tools" class="header-brutalist__link{% if collection.handle == 'tools' %} header-brutalist__link--active{% endif %}">tools</a>
-      <a href="/collections/electronics" class="header-brutalist__link{% if collection.handle == 'electronics' %} header-brutalist__link--active{% endif %}">electronics</a>
-      <a href="/collections/kitchen" class="header-brutalist__link{% if collection.handle == 'kitchen' %} header-brutalist__link--active{% endif %}">kitchen</a>
-      <a href="/collections/accessories" class="header-brutalist__link{% if collection.handle == 'accessories' %} header-brutalist__link--active{% endif %}">accessories</a>
-      <a href="/collections/all" class="header-brutalist__link{% if collection.handle == 'all' %} header-brutalist__link--active{% endif %}">all</a>
-      <a href="/pages/about" class="header-brutalist__link{% if request.path contains 'about' %} header-brutalist__link--active{% endif %}">about</a>
-      <a href="/pages/contact" class="header-brutalist__link{% if request.path contains 'contact' %} header-brutalist__link--active{% endif %}">contact</a>
+      {%- for link in linklists.main-menu.links -%}
+        <a href="{{ link.url }}" class="header-brutalist__link{% if link.active %} header-brutalist__link--active{% endif %}">{{ link.title | downcase }}</a>
+      {%- endfor -%}
     </nav>
 
     {%- comment -%} Date/Time display like Supreme {%- endcomment -%}
@@ -126,7 +120,6 @@
 {
   "name": "Header",
   "class": "section-header",
-  "max_blocks": 3,
   "settings": [
     {
       "type": "select",

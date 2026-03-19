@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "drop_photo": {
+      "type": "collection-drop-photo",
+      "settings": {}
+    }
+  },
+  "order": [
+    "drop_photo"
+  ]
+}

@@ -1,0 +1,341 @@
+{% comment %}
+  collection-drop-photo.liquid
+  Used by templates/collection.drop.json
+  
+  Reads two metafields from the collection:
+    - custom.hero_photo_url  (string) → CDN URL of the source photo
+    - custom.hotspots        (json)   → array of hotspot objects
+  
+  Hotspot JSON format (stored in collection metafield):
+  [
+    {"left": 22.4, "top": 48.1, "handle": "nikon-fa-35mm-film-camera", "title": "Nikon FA 35mm Film Camera", "price": "$285", "img": "https://cdn.shopify.com/..."},
+    ...
+  ]
+  
+  Falls back gracefully if metafields are not set.
+{% endcomment %}
+
+{%- assign hero_url  = collection.metafields.custom.hero_photo_url.value -%}
+{%- assign hotspots_json = collection.metafields.custom.hotspots.value -%}
+
+<style>
+  /* ---- Drop page layout ---- */
+  .drop-page {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    padding-bottom: 60px;
+  }
+
+  /* Drop banner / title row */
+  .drop-title-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 24px 24px 12px;
+    border-bottom: 2px solid #000;
+  }
+  .drop-title-bar h1 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #000;
+    margin: 0;
+  }
+  .drop-title-bar .drop-meta {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.06em;
+  }
+
+  /* ---- Photo Wrapper ---- */
+  .drop-photo-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #111;
+  }
+  .drop-photo-wrapper img.drop-hero {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 80vh;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* ---- Hotspot Dots ---- */
+  .drop-hotspot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 2px solid #d4021d;
+    border-radius: 50%;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .drop-hotspot::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 8px; height: 8px;
+    background: #d4021d;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .drop-hotspot:hover, .drop-hotspot.active {
+    background: #d4021d;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+  .drop-hotspot:hover::after, .drop-hotspot.active::after {
+    background: #fff;
+  }
+  @keyframes drop-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(212,2,29,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(212,2,29,0); }
+    100% { box-shadow: 0 0 0 0 rgba(212,2,29,0); }
+  }
+  .drop-hotspot { animation: drop-pulse 2s ease-in-out infinite; }
+  .drop-hotspot:hover, .drop-hotspot.active { animation: none; }
+
+  /* ---- Popup Card ---- */
+  .drop-popup {
+    position: absolute;
+    width: 180px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  .drop-popup.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .drop-popup img {
+    width: 100%; height: 110px;
+    object-fit: cover; display: block;
+    margin-bottom: 8px;
+    background: #f5f5f5;
+  }
+  .drop-popup-title {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: #000; margin: 0 0 3px; line-height: 1.3;
+  }
+  .drop-popup-price { font-size: 11px; color: #000; margin: 0 0 8px; }
+  .drop-popup-link {
+    display: block; background: #d4021d; color: #fff;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    text-align: center; text-decoration: none; padding: 6px 0;
+  }
+  .drop-popup-link:hover { background: #a80118; color: #fff; }
+
+  /* ---- Product Grid ---- */
+  .drop-grid-header {
+    display: flex; align-items: baseline;
+    justify-content: space-between;
+    padding: 24px 24px 12px;
+    border-top: 1px solid #e8e8e8;
+  }
+  .drop-grid-header h2 {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #000; margin: 0;
+  }
+  .drop-grid-header a {
+    font-size: 11px; color: #000;
+    text-decoration: underline; letter-spacing: 0.04em;
+  }
+  .drop-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0;
+    padding: 0 24px;
+  }
+  .drop-product-card {
+    padding: 12px 8px;
+    text-decoration: none; display: block;
+    border-right: 1px solid #e8e8e8;
+    transition: background 0.1s;
+  }
+  .drop-product-card:hover { background: #f7f7f7; }
+  .drop-product-card img {
+    width: 100%; aspect-ratio: 1;
+    object-fit: cover; display: block;
+    background: #f5f5f5; margin-bottom: 8px;
+  }
+  .drop-product-card-title {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: #000; margin: 0 0 3px; line-height: 1.3;
+  }
+  .drop-product-card-price { font-size: 10px; color: #000; }
+
+  /* No photo fallback */
+  .drop-no-photo {
+    padding: 60px 24px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 600px) {
+    .drop-photo-wrapper img.drop-hero { max-height: 55vw; }
+    .drop-hotspot { width: 14px; height: 14px; }
+    .drop-product-grid { grid-template-columns: repeat(2, 1fr); padding: 0 12px; }
+  }
+</style>
+
+<div class="drop-page">
+
+  {%- comment -%} Title bar {%- endcomment -%}
+  <div class="drop-title-bar">
+    <h1>{{ collection.title }}</h1>
+    <span class="drop-meta">{{ collection.products_count }} item{% if collection.products_count != 1 %}s{% endif %}</span>
+  </div>
+
+  {%- comment -%} Hero photo + hotspots {%- endcomment -%}
+  {%- if hero_url != blank -%}
+    <div class="drop-photo-wrapper" id="drop-wrapper">
+      <img class="drop-hero" src="{{ hero_url }}" alt="{{ collection.title }}" loading="eager">
+
+      {%- if hotspots_json != blank -%}
+        {%- assign parsed_hotspots = hotspots_json -%}
+        <div id="drop-hotspots-data" style="display:none">{{ hotspots_json }}</div>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    <div class="drop-no-photo">Photo coming soon</div>
+  {%- endif -%}
+
+  {%- comment -%} Product grid {%- endcomment -%}
+  {%- if collection.products_count > 0 -%}
+    <div class="drop-grid-header">
+      <h2>Items in this drop</h2>
+      <a href="/collections/all">View all</a>
+    </div>
+    <div class="drop-product-grid">
+      {%- for product in collection.products -%}
+        <a href="{{ product.url }}" class="drop-product-card">
+          {%- if product.featured_image -%}
+            <img src="{{ product.featured_image | image_url: width: 400 }}" alt="{{ product.title | escape }}" loading="lazy">
+          {%- else -%}
+            <div style="width:100%;aspect-ratio:1;background:#f0f0f0;"></div>
+          {%- endif -%}
+          <p class="drop-product-card-title">{{ product.title }}</p>
+          <p class="drop-product-card-price">{{ product.price | money }}</p>
+        </a>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+</div>
+
+{%- if hero_url != blank -%}
+<script>
+(function() {
+  var wrapper = document.getElementById('drop-wrapper');
+  var dataEl  = document.getElementById('drop-hotspots-data');
+  if (!wrapper || !dataEl) return;
+
+  var hotspots;
+  try { hotspots = JSON.parse(dataEl.textContent.trim()); } catch(e) { return; }
+  if (!Array.isArray(hotspots) || hotspots.length === 0) return;
+
+  var activePopup    = null;
+  var activeHotspot  = null;
+
+  // Build hotspot + popup elements dynamically
+  hotspots.forEach(function(hs, i) {
+    // Dot
+    var dot = document.createElement('button');
+    dot.className  = 'drop-hotspot';
+    dot.style.left = hs.left + '%';
+    dot.style.top  = hs.top  + '%';
+    dot.setAttribute('type', 'button');
+    dot.setAttribute('aria-label', 'View ' + hs.title);
+    dot.dataset.popupId = 'drop-popup-' + i;
+
+    // Popup
+    var popup = document.createElement('div');
+    popup.className = 'drop-popup';
+    popup.id        = 'drop-popup-' + i;
+    popup.setAttribute('aria-hidden', 'true');
+    popup.innerHTML =
+      (hs.img ? '<img src="' + hs.img + '" alt="' + hs.title + '" loading="lazy">' : '') +
+      '<p class="drop-popup-title">' + hs.title + '</p>' +
+      '<p class="drop-popup-price">' + hs.price + '</p>' +
+      '<a class="drop-popup-link" href="/products/' + hs.handle + '">View product</a>';
+
+    wrapper.appendChild(dot);
+    wrapper.appendChild(popup);
+
+    // Events
+    function showPopup() {
+      hideAll();
+      var wr  = wrapper.getBoundingClientRect();
+      var dr  = dot.getBoundingClientRect();
+      var lx  = dr.left - wr.left + 14;
+      var ty  = dr.top  - wr.top  + 14;
+      if (lx + 180 > wr.width  - 10) lx = dr.left - wr.left - 186;
+      if (ty + 210 > wr.height - 10) ty = dr.top  - wr.top  - 216;
+      popup.style.left = lx + 'px';
+      popup.style.top  = ty + 'px';
+      popup.classList.add('visible');
+      popup.removeAttribute('aria-hidden');
+      dot.classList.add('active');
+      activePopup   = popup;
+      activeHotspot = dot;
+    }
+
+    dot.addEventListener('mouseenter', showPopup);
+    dot.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dot.classList.contains('active') ? hideAll() : showPopup();
+    });
+    // Keep popup open when mousing over it
+    popup.addEventListener('mouseenter', function() {
+      popup.classList.add('visible');
+    });
+  });
+
+  function hideAll() {
+    wrapper.querySelectorAll('.drop-popup').forEach(function(p) {
+      p.classList.remove('visible');
+      p.setAttribute('aria-hidden', 'true');
+    });
+    wrapper.querySelectorAll('.drop-hotspot').forEach(function(d) {
+      d.classList.remove('active');
+    });
+    activePopup = activeHotspot = null;
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.drop-hotspot') && !e.target.closest('.drop-popup')) hideAll();
+  });
+  window.addEventListener('resize', hideAll);
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Drop — Shop the Photo",
+  "tag": "section",
+  "class": "section-drop-photo",
+  "settings": [],
+  "presets": [{"name": "Drop — Shop the Photo"}]
+}
+{% endschema %}
