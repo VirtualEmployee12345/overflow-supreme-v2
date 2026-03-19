@@ -1,0 +1,186 @@
+{%- liquid
+  assign header_tag = 'div'
+  if section.settings.sticky_header_type != 'none'
+    assign header_tag = 'sticky-header'
+  endif
+-%}
+
+{%- style -%}
+  .section-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: none;
+  }
+{%- endstyle -%}
+
+<{{ header_tag }} {% if header_tag == 'sticky-header' %}data-sticky-type="{{ section.settings.sticky_header_type }}"{% endif %} class="header-wrapper color-{{ section.settings.color_scheme }} section-header">
+  <header class="header-brutalist">
+    {%- if request.page_type == 'index' -%}
+      <h1 class="header-brutalist__heading">
+    {%- endif -%}
+    <a href="{{ routes.root_url }}" class="header-brutalist__logo">Overflow</a>
+    {%- if request.page_type == 'index' -%}
+      </h1>
+    {%- endif -%}
+
+    <nav class="header-brutalist__nav" aria-label="Primary">
+      <a href="/pages/previews" class="header-brutalist__link{% if request.path contains 'previews' %} header-brutalist__link--active{% endif %}">previews</a>
+      <a href="/pages/lookbook" class="header-brutalist__link{% if request.path contains 'lookbook' %} header-brutalist__link--active{% endif %}">lookbook</a>
+      <a href="/blogs/news" class="header-brutalist__link{% if request.path contains 'news' %} header-brutalist__link--active{% endif %}">news</a>
+      <a href="/pages/about" class="header-brutalist__link{% if request.path contains 'about' %} header-brutalist__link--active{% endif %}">about</a>
+      <a href="/pages/stores" class="header-brutalist__link{% if request.path contains 'stores' %} header-brutalist__link--active{% endif %}">stores</a>
+      <a href="/pages/faq" class="header-brutalist__link{% if request.path contains 'faq' %} header-brutalist__link--active{% endif %}">f.a.q.</a>
+      <a href="/pages/sizing" class="header-brutalist__link{% if request.path contains 'sizing' %} header-brutalist__link--active{% endif %}">sizing</a>
+      <a href="/pages/contact" class="header-brutalist__link{% if request.path contains 'contact' %} header-brutalist__link--active{% endif %}">contact</a>
+    </nav>
+
+    {%- comment -%} Date/Time display like Supreme {%- endcomment -%}
+    <div class="supreme-datetime" id="supreme-datetime"></div>
+  </header>
+</{{ header_tag }}>
+
+{% javascript %}
+  class StickyHeader extends HTMLElement {
+    constructor() {
+      super();
+    }
+    connectedCallback() {
+      this.header = document.querySelector('.section-header');
+      this.headerBounds = {};
+      this.currentScrollTop = 0;
+      this.preventReveal = false;
+      this.predictiveSearch = this.querySelector('predictive-search');
+      this.onScrollHandler = this.onScroll.bind(this);
+      this.hideHeaderOnScrollUp = () => this.preventReveal = true;
+      this.addEventListener('preventHeaderReveal', this.hideHeaderOnScrollUp);
+      window.addEventListener('scroll', this.onScrollHandler, false);
+      this.createObserver();
+    }
+    createObserver() {
+      let observer = new IntersectionObserver((entries, observer) => {
+        this.headerBounds = entries[0].intersectionRect;
+        observer.disconnect();
+      });
+      observer.observe(this);
+    }
+    disconnectedCallback() {
+      this.removeEventListener('preventHeaderReveal', this.hideHeaderOnScrollUp);
+      window.removeEventListener('scroll', this.onScrollHandler);
+    }
+    onScroll() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop > this.currentScrollTop && scrollTop > this.headerBounds.bottom) {
+        requestAnimationFrame(this.hide.bind(this));
+      } else if (scrollTop < this.currentScrollTop && scrollTop > this.headerBounds.bottom) {
+        if (!this.preventReveal) {
+          requestAnimationFrame(this.reveal.bind(this));
+        } else {
+          window.clearTimeout(this.isScrolling);
+          this.isScrolling = setTimeout(() => {
+            this.preventReveal = false;
+          }, 66);
+          requestAnimationFrame(this.hide.bind(this));
+        }
+      } else if (scrollTop <= this.headerBounds.bottom) {
+        requestAnimationFrame(this.reset.bind(this));
+      }
+      this.currentScrollTop = scrollTop;
+    }
+    hide() {
+      this.header.classList.add('shopify-section-header-hidden', 'shopify-section-header-sticky');
+    }
+    reveal() {
+      this.header.classList.add('shopify-section-header-sticky');
+      this.header.classList.remove('shopify-section-header-hidden');
+    }
+    reset() {
+      this.header.classList.remove('shopify-section-header-hidden', 'shopify-section-header-sticky');
+    }
+  }
+  customElements.define('sticky-header', StickyHeader);
+{% endjavascript %}
+
+<script>
+  (function() {
+    function updateDatetime() {
+      var el = document.getElementById('supreme-datetime');
+      if (!el) return;
+      var now = new Date();
+      var m = String(now.getMonth() + 1).padStart(2, '0');
+      var d = String(now.getDate()).padStart(2, '0');
+      var y = now.getFullYear();
+      var h = String(now.getHours() % 12 || 12).padStart(2, '0');
+      var min = String(now.getMinutes()).padStart(2, '0');
+      var ampm = now.getHours() >= 12 ? 'pm' : 'am';
+      el.textContent = m + '/' + d + '/' + y + ' ' + h + ':' + min + ampm + ' NYC';
+    }
+    updateDatetime();
+    setInterval(updateDatetime, 60000);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "section-header",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "select",
+      "id": "sticky_header_type",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "on-scroll-up", "label": "On scroll up" },
+        { "value": "always", "label": "Always" },
+        { "value": "reduce-logo-size", "label": "Reduce logo size" }
+      ],
+      "default": "on-scroll-up",
+      "label": "Sticky header"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_line_separator",
+      "default": false,
+      "label": "Show line separator"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section bottom margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "Section top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "Section bottom padding",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,480 @@
+/* ============================================================
+   SUPREME.COM COLLECTIONS — OVERFLOW THEME OVERRIDES
+   Matches: https://us.supreme.com/collections/all
+   ============================================================ */
+
+/* ── Base / Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --supreme-red: #d4021d;
+  --supreme-white: #ffffff;
+  --supreme-black: #000000;
+  --supreme-gray-dark: #222222;
+  --supreme-gray-mid: #555555;
+  --supreme-gray-light: #cccccc;
+  --supreme-cookie-bg: #1a1a1a;
+  --supreme-font: Arial, Helvetica, "Helvetica Neue", sans-serif;
+  --supreme-nav-size: 11px;
+  --supreme-logo-size: 18px;
+  --supreme-footer-size: 12px;
+  --page-padding: 0 20px;
+}
+
+html, body {
+  font-family: var(--supreme-font) !important;
+  background: var(--supreme-white) !important;
+  color: var(--supreme-black) !important;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+/* ── Cookie / Announcement Bar ────────────────────────────── */
+.announcement-bar,
+.shopify-section--announcement-bar {
+  background: var(--supreme-cookie-bg) !important;
+  color: #ccc !important;
+  font-size: 11px;
+  font-family: var(--supreme-font);
+  padding: 6px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+}
+
+.announcement-bar a,
+.announcement-bar__link { color: #78b3ff !important; }
+
+/* ── Header ───────────────────────────────────────────────── */
+.header-wrapper,
+.section-header,
+.shopify-section-header {
+  background: var(--supreme-white) !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Supreme logo area — centered red box */
+.header-brutalist {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px 20px 0 !important;
+  gap: 0 !important;
+}
+
+.header-brutalist__heading,
+.header-brutalist h1 {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+/* The logo box — red rectangle with white text, Supreme style */
+.header-brutalist__logo {
+  display: inline-block !important;
+  background: var(--supreme-red) !important;
+  color: var(--supreme-white) !important;
+  font-family: var(--supreme-font) !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1 !important;
+  padding: 5px 14px 6px !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  text-transform: none !important;
+}
+
+.header-brutalist__logo:hover {
+  text-decoration: none !important;
+  background: var(--supreme-red) !important;
+}
+
+/* Top nav below logo — centered, small text */
+.header-brutalist__nav {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 0 !important;
+  margin-top: 0 !important;
+  padding: 6px 0 0 0 !important;
+  border-top: none !important;
+}
+
+.header-brutalist__link {
+  font-family: var(--supreme-font) !important;
+  font-size: var(--supreme-nav-size) !important;
+  font-weight: 400 !important;
+  color: var(--supreme-black) !important;
+  text-decoration: none !important;
+  letter-spacing: 0 !important;
+  padding: 4px 8px !important;
+  text-transform: lowercase !important;
+}
+
+.header-brutalist__link:hover,
+.header-brutalist__link--active {
+  text-decoration: underline !important;
+}
+
+/* ── Page layout — two-column with left sidebar ───────────── */
+/* Override page-width to allow sidebar + grid layout */
+.facets-vertical {
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important;
+  gap: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+}
+
+/* Remove collection banner/title area */
+.main-collection-banner,
+.section-main-collection-banner,
+.collection-hero,
+.collection__title { display: none !important; }
+
+/* ── Left Sidebar Navigation ──────────────────────────────── */
+.facets-wrapper {
+  width: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+  padding: 20px 10px 20px 0 !important;
+  border: none !important;
+  background: var(--supreme-white) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hide filter controls — Supreme uses static category links */
+.facets__header,
+.facets__form,
+.facets__price,
+.facet-checkbox,
+.facets-pill,
+.active-facets,
+.facets-vertical-sort,
+.facets__reset-link,
+details[open] > .facets__display,
+.mobile-facets__wrapper { display: none !important; }
+
+/* Supreme left nav — the category list */
+.supreme-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  padding-top: 10px;
+}
+
+.supreme-sidebar-nav a {
+  font-family: var(--supreme-font);
+  font-size: var(--supreme-nav-size);
+  font-weight: 400;
+  color: var(--supreme-black);
+  text-decoration: none;
+  text-align: right;
+  padding: 2px 0;
+  display: block;
+  line-height: 1.6;
+}
+
+.supreme-sidebar-nav a:hover,
+.supreme-sidebar-nav a.active {
+  text-decoration: underline;
+}
+
+/* ── Product Grid ─────────────────────────────────────────── */
+.product-grid-container,
+.product-grid-container--supreme {
+  flex: 1 !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.product-grid--supreme,
+.product-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+  background: var(--supreme-white) !important;
+}
+
+@media screen and (max-width: 1200px) {
+  .product-grid--supreme,
+  .product-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+@media screen and (max-width: 990px) {
+  .facets-vertical {
+    grid-template-columns: 100px 1fr !important;
+  }
+  .product-grid--supreme,
+  .product-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+@media screen and (max-width: 600px) {
+  .facets-vertical {
+    grid-template-columns: 1fr !important;
+  }
+  .facets-wrapper { display: none !important; }
+  .product-grid--supreme,
+  .product-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── Product Cards ────────────────────────────────────────── */
+.product-card-wrapper--supreme,
+.card-wrapper {
+  background: var(--supreme-white) !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.card--supreme,
+.card {
+  background: var(--supreme-white) !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Product image container — no background, square crop */
+.card__inner--supreme,
+.card__inner {
+  background: var(--supreme-white) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.card__media--supreme,
+.card__media {
+  background: var(--supreme-white) !important;
+  border-radius: 0 !important;
+}
+
+/* Supreme product images — white bg, contain within cell */
+.supreme-card__image,
+.card__media img,
+.card__media .media img {
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: contain !important;
+  background: var(--supreme-white) !important;
+}
+
+.media--hover-effect img:first-child {
+  transition: none !important;
+}
+
+/* Product title — below image, small left-aligned text */
+.supreme-card__title,
+.card__content .card__heading,
+.card__heading {
+  font-family: var(--supreme-font) !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: var(--supreme-black) !important;
+  margin: 4px 4px 0 4px !important;
+  padding: 0 !important;
+  line-height: 1.3 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.card__heading a {
+  color: var(--supreme-black) !important;
+  text-decoration: none !important;
+}
+.card__heading a:hover { text-decoration: underline !important; }
+
+/* Price */
+.price,
+.price__regular,
+.price__sale,
+.price-item,
+.card__content .price {
+  font-family: var(--supreme-font) !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: var(--supreme-black) !important;
+  margin: 2px 4px 6px 4px !important;
+  padding: 0 !important;
+}
+
+/* Hide badges, quick-add buttons, ratings */
+.card__badge,
+.card-information__button,
+.quick-add,
+.quick-add-modal__content,
+.product-form__submit,
+.card__media .deferred-media,
+.product-form { display: none !important; }
+
+/* ── Footer ───────────────────────────────────────────────── */
+.footer,
+.footer-brutalist {
+  background: var(--supreme-white) !important;
+  border-top: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.footer-brutalist__inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 20px !important;
+  max-width: 100% !important;
+  border-top: 1px solid var(--supreme-gray-light) !important;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Left side: shop + view all */
+.footer-brutalist__primary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* Right side: seasonal/info links */
+.footer-brutalist__secondary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.footer-brutalist__nav,
+.footer-brutalist__link,
+footer a {
+  font-family: var(--supreme-font) !important;
+  font-size: var(--supreme-footer-size) !important;
+  font-weight: 400 !important;
+  color: var(--supreme-black) !important;
+  text-decoration: none !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.footer-brutalist__link:hover,
+footer a:hover { text-decoration: underline !important; }
+
+.footer-brutalist__copyright {
+  font-family: var(--supreme-font) !important;
+  font-size: var(--supreme-footer-size) !important;
+  color: var(--supreme-black) !important;
+}
+
+/* ── Loading overlay ──────────────────────────────────────── */
+.loading-overlay {
+  background: var(--supreme-white) !important;
+}
+
+/* ── Pagination ───────────────────────────────────────────── */
+.pagination {
+  display: none !important;
+}
+
+/* ── Remove all borders, cards, gradients ────────────────── */
+.gradient {
+  background: var(--supreme-white) !important;
+}
+
+.color-background-1,
+.color-background-2,
+.color-inverse {
+  background: var(--supreme-white) !important;
+  color: var(--supreme-black) !important;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--supreme-gray-light); border-radius: 0; }
+
+/* ── Supreme Datetime display (below logo nav) ────────────── */
+.supreme-datetime {
+  font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
+  font-size: 11px;
+  color: #000;
+  text-align: center;
+  padding: 2px 0 10px 0;
+  display: block;
+  letter-spacing: 0;
+}
+
+/* ── Hide collection banner / hero ───────────────────────── */
+.shopify-section .main-collection-banner,
+.shopify-section-group-header-group ~ main .collection-hero,
+.section-main-collection-banner { display: none !important; }
+
+/* ── Remove section spacing ───────────────────────────────── */
+.shopify-section { margin: 0 !important; padding: 0 !important; }
+
+/* ── Announcement bar style like Supreme cookie bar ──────── */
+.announcement-bar__message,
+.announcement-bar {
+  font-family: Arial, Helvetica, "Helvetica Neue", sans-serif !important;
+  font-size: 11px !important;
+  background: #1c1c1c !important;
+  color: #ddd !important;
+  text-align: left !important;
+  padding: 7px 16px !important;
+}
+
+.announcement-bar__link { color: #7aabff !important; }
+
+/* ── Cookie bar (if using cookie consent app) ─────────────── */
+.cookie-bar, #cookie-bar {
+  background: #1c1c1c !important;
+  color: #ccc !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 11px !important;
+  padding: 8px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.cookie-bar a, #cookie-bar a { color: #7aabff !important; }
+
+.cookie-bar button, #cookie-bar button {
+  background: transparent !important;
+  border: none !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  margin: 0 0 0 8px !important;
+  float: right !important;
+}

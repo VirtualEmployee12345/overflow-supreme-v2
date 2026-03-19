@@ -1,0 +1,289 @@
+{{ 'template-collection.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'supreme-overrides.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  /* Supreme-style two-column layout: sidebar + grid */
+  .supreme-collection-layout {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    min-height: 60vh;
+    background: #fff;
+  }
+
+  @media screen and (max-width: 749px) {
+    .supreme-collection-layout {
+      grid-template-columns: 1fr;
+    }
+    .supreme-sidebar { display: none; }
+  }
+
+  /* ── Sidebar ── */
+  .supreme-sidebar {
+    padding: 18px 0 18px 20px;
+    background: #fff;
+  }
+
+  .supreme-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+  }
+
+  .supreme-sidebar__link {
+    font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #000;
+    text-decoration: none;
+    text-align: right;
+    display: block;
+    padding: 2px 10px 2px 0;
+    line-height: 1.7;
+  }
+
+  .supreme-sidebar__link:hover,
+  .supreme-sidebar__link--active {
+    text-decoration: underline;
+  }
+
+  /* ── Product Grid ── */
+  .supreme-grid-area {
+    background: #fff;
+    padding: 0;
+  }
+
+  .product-grid--supreme {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    background: #fff;
+  }
+
+  @media screen and (max-width: 1200px) {
+    .product-grid--supreme { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media screen and (max-width: 900px) {
+    .product-grid--supreme { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media screen and (max-width: 600px) {
+    .product-grid--supreme { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .product-grid--supreme .grid__item {
+    display: block;
+    background: #fff;
+  }
+
+  /* ── Supreme Product Card ── */
+  .supreme-product-card {
+    display: block;
+    background: #fff;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .supreme-product-card__image-wrap {
+    display: block;
+    background: #fff;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    position: relative;
+  }
+
+  .supreme-product-card__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: #fff;
+    transition: none;
+  }
+
+  .supreme-product-card__info {
+    padding: 4px 4px 10px 4px;
+  }
+
+  .supreme-product-card__title {
+    font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #000;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+    text-decoration: none;
+    display: block;
+  }
+
+  .supreme-product-card__title:hover {
+    text-decoration: underline;
+  }
+
+  .supreme-product-card__price {
+    font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #000;
+    margin: 0;
+    display: block;
+  }
+
+  .supreme-product-card__sold-out {
+    font-size: 11px;
+    color: #888;
+  }
+
+  /* ── Loading ── */
+  .loading-overlay { background: #fff !important; }
+
+  /* ── Empty state ── */
+  .supreme-empty {
+    padding: 40px 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+{%- endstyle -%}
+
+{%- paginate collection.products by section.settings.products_per_page -%}
+
+<div class="supreme-collection-layout">
+  {%- comment -%} ── Left Sidebar Category Nav ── {%- endcomment -%}
+  <aside class="supreme-sidebar" aria-label="Categories">
+    <nav class="supreme-sidebar__nav">
+      {%- liquid
+        assign categories = 'new,jackets,shirts,tops/sweaters,sweatshirts,pants,hats,bags,accessories,shoes,skate,all' | split: ','
+        assign handles = 'new,jackets,shirts,tops-sweaters,sweatshirts,pants,hats,bags,accessories,shoes,skate,all' | split: ','
+      -%}
+      {%- for cat in categories -%}
+        {%- assign handle = handles[forloop.index0] -%}
+        {%- assign cat_url = '/collections/' | append: handle -%}
+        {%- assign is_active = false -%}
+        {%- if collection.handle == handle -%}
+          {%- assign is_active = true -%}
+        {%- elsif handle == 'all' and collection.handle == 'all' -%}
+          {%- assign is_active = true -%}
+        {%- endif -%}
+        <a
+          href="{{ cat_url }}"
+          class="supreme-sidebar__link{% if is_active %} supreme-sidebar__link--active{% endif %}"
+        >{{ cat }}</a>
+      {%- endfor -%}
+    </nav>
+  </aside>
+
+  {%- comment -%} ── Product Grid ── {%- endcomment -%}
+  <div class="supreme-grid-area">
+    <div class="loading-overlay gradient"></div>
+
+    {%- if collection.products.size == 0 -%}
+      <div class="supreme-empty">
+        {{ 'sections.collection_template.empty' | t }}<br>
+        <a href="{{ collection.url }}" class="underlined-link">{{ 'sections.collection_template.use_fewer_filters_html' | t: link: collection.url, class: 'underlined-link link' }}</a>
+      </div>
+    {%- else -%}
+      <ul
+        id="product-grid"
+        data-id="{{ section.id }}"
+        class="product-grid--supreme"
+      >
+        {%- for product in collection.products -%}
+          {%- assign lazy_load = true -%}
+          {%- if forloop.index <= 5 -%}{%- assign lazy_load = false -%}{%- endif -%}
+          <li class="grid__item">
+            {%- comment -%} Supreme-style minimal product card {%- endcomment -%}
+            <article class="supreme-product-card">
+              <a href="{{ product.url }}" class="supreme-product-card__image-wrap" aria-label="{{ product.title | escape }}">
+                {%- if product.featured_media -%}
+                  <img
+                    srcset="
+                      {%- if product.featured_media.width >= 165 -%}{{ product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
+                      {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                      {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                      {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                      {{ product.featured_media | image_url }} {{ product.featured_media.width }}w
+                    "
+                    src="{{ product.featured_media | image_url: width: 360 }}"
+                    sizes="(min-width: 1200px) 20vw, (min-width: 990px) 25vw, (min-width: 600px) 33vw, 50vw"
+                    alt="{{ product.featured_media.alt | escape | default: product.title | escape }}"
+                    {% unless lazy_load == false %}loading="lazy"{% endunless %}
+                    width="{{ product.featured_media.width }}"
+                    height="{{ product.featured_media.height }}"
+                  >
+                {%- else -%}
+                  {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+              </a>
+              <div class="supreme-product-card__info">
+                <a href="{{ product.url }}" class="supreme-product-card__title">{{ product.title }}</a>
+                <span class="supreme-product-card__price">
+                  {%- if product.available -%}
+                    {{ product.price | money }}
+                  {%- else -%}
+                    <span class="supreme-product-card__sold-out">Sold Out</span>
+                  {%- endif -%}
+                </span>
+              </div>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if paginate.pages > 1 -%}
+        {% render 'pagination', paginate: paginate, anchor: '' %}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collection products",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 96,
+      "step": 4,
+      "default": 48,
+      "label": "Products per page"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section bottom padding",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

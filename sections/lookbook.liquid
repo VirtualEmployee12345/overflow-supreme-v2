@@ -1,0 +1,275 @@
+{{ 'lookbook.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign image_blocks = section.blocks | where: 'type', 'image'
+  assign image_count = image_blocks.size
+  assign aspect_ratio = section.settings.image_ratio | default: '4 / 5'
+  assign fetch_priority = 'auto'
+  if section.index == 1
+    assign fetch_priority = 'high'
+  endif
+-%}
+
+<section
+  class="lookbook-section color-background-1"
+  id="Lookbook-{{ section.id }}"
+  data-lookbook-section
+  data-section-id="{{ section.id }}"
+  tabindex="0"
+  role="region"
+  aria-label="{{ section.settings.season_title | default: 'Lookbook gallery' | escape }}"
+>
+  <div class="lookbook lookbook--{{ section.settings.layout_density }}">
+    <div class="lookbook__stage">
+      {%- if image_count > 0 -%}
+        <div class="lookbook__slides" data-lookbook-slides>
+          {%- for block in image_blocks -%}
+            {%- liquid
+              assign loading_strategy = 'lazy'
+              assign slide_fetch_priority = 'auto'
+              if forloop.first
+                assign loading_strategy = 'eager'
+                assign slide_fetch_priority = fetch_priority
+              endif
+            -%}
+            <article
+              class="lookbook__slide{% if forloop.first %} is-active{% endif %}"
+              {{ block.shopify_attributes }}
+              data-lookbook-slide
+              data-index="{{ forloop.index0 }}"
+              aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+            >
+              <div class="lookbook__media" style="--lookbook-ratio: {{ aspect_ratio }};">
+                {%- if block.settings.image != blank -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 2200
+                    | image_tag:
+                      widths: '480, 720, 960, 1200, 1600, 2200',
+                      sizes: '(min-width: 1200px) min(48vw, 720px), (min-width: 750px) min(62vw, 640px), calc(100vw - 3rem)',
+                      loading: loading_strategy,
+                      fetchpriority: slide_fetch_priority,
+                      alt: block.settings.image.alt | escape,
+                      class: 'lookbook__image'
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'lookbook__placeholder' }}
+                {%- endif -%}
+              </div>
+            </article>
+          {%- endfor -%}
+        </div>
+
+        <div class="lookbook__rail">
+          <button
+            class="lookbook__nav lookbook__nav--prev"
+            type="button"
+            data-lookbook-prev
+            aria-label="Previous look"
+          >
+            <span aria-hidden="true">&larr;</span>
+          </button>
+          <p class="lookbook__counter" data-lookbook-counter>
+            1 of {{ image_count }}
+          </p>
+          <button
+            class="lookbook__nav lookbook__nav--next"
+            type="button"
+            data-lookbook-next
+            aria-label="Next look"
+            {% if image_count < 2 %}
+              disabled
+            {% endif %}
+          >
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      {%- else -%}
+        <div class="lookbook__empty">
+          <div class="lookbook__media" style="--lookbook-ratio: {{ aspect_ratio }};">
+            {{ 'image' | placeholder_svg_tag: 'lookbook__placeholder' }}
+          </div>
+          <p class="lookbook__empty-text">Add lookbook image blocks to populate this gallery.</p>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="lookbook__footer">
+      <div class="lookbook__meta">
+        <p class="lookbook__season">
+          {{ section.settings.season_title | default: 'Fall/Winter 2025' | escape }}
+        </p>
+        {%- if section.settings.product_links != blank -%}
+          <div class="lookbook__products" aria-label="Featured products">
+            {%- for product in section.settings.product_links -%}
+              <a href="{{ product.url }}" class="lookbook__product-link">
+                {{- product.title | escape -}}
+              </a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.archive_seasons != blank -%}
+        <nav class="lookbook__archive" aria-label="Lookbook archive">
+          <p class="lookbook__archive-label">Archive</p>
+          <div class="lookbook__archive-links">
+            {%- for link in section.settings.archive_seasons.links -%}
+              <a href="{{ link.url }}" class="lookbook__archive-link">
+                {{- link.title | escape -}}
+              </a>
+            {%- endfor -%}
+          </div>
+        </nav>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('Lookbook-{{ section.id }}');
+    if (!section) return;
+
+    const slides = Array.from(section.querySelectorAll('[data-lookbook-slide]'));
+    const prevButton = section.querySelector('[data-lookbook-prev]');
+    const nextButton = section.querySelector('[data-lookbook-next]');
+    const counter = section.querySelector('[data-lookbook-counter]');
+
+    if (!slides.length || !prevButton || !nextButton || !counter) return;
+
+    let currentIndex = slides.findIndex((slide) => slide.classList.contains('is-active'));
+    if (currentIndex < 0) currentIndex = 0;
+
+    const render = () => {
+      slides.forEach((slide, index) => {
+        const active = index === currentIndex;
+        slide.classList.toggle('is-active', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+
+      counter.textContent = `${currentIndex + 1} of ${slides.length}`;
+      prevButton.disabled = currentIndex === 0;
+      nextButton.disabled = currentIndex === slides.length - 1;
+    };
+
+    prevButton.addEventListener('click', () => {
+      if (currentIndex === 0) return;
+      currentIndex -= 1;
+      render();
+    });
+
+    nextButton.addEventListener('click', () => {
+      if (currentIndex === slides.length - 1) return;
+      currentIndex += 1;
+      render();
+    });
+
+    section.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' && currentIndex > 0) {
+        currentIndex -= 1;
+        render();
+      }
+
+      if (event.key === 'ArrowRight' && currentIndex < slides.length - 1) {
+        currentIndex += 1;
+        render();
+      }
+    });
+
+    render();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Lookbook",
+  "tag": "section",
+  "class": "section section-lookbook",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "season_title",
+      "label": "Season title",
+      "default": "Fall/Winter 2025"
+    },
+    {
+      "type": "product_list",
+      "id": "product_links",
+      "label": "Product links",
+      "limit": 12
+    },
+    {
+      "type": "link_list",
+      "id": "archive_seasons",
+      "label": "Archive seasons menu"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "default": "4 / 5",
+      "options": [
+        {
+          "value": "4 / 5",
+          "label": "4:5 portrait"
+        },
+        {
+          "value": "3 / 4",
+          "label": "3:4 portrait"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "layout_density",
+      "label": "Layout density",
+      "default": "balanced",
+      "options": [
+        {
+          "value": "balanced",
+          "label": "Balanced"
+        },
+        {
+          "value": "immersive",
+          "label": "Immersive"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "Add gallery images as section blocks. Shopify section settings support product and link lists here, but not a native multi-image picker."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Lookbook image",
+      "limit": 50,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

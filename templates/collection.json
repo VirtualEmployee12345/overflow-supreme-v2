@@ -1,0 +1,24 @@
+{
+  "sections": {
+    "product-grid": {
+      "type": "main-collection-product-grid",
+      "settings": {
+        "products_per_page": 48,
+        "columns_desktop": 5,
+        "image_ratio": "portrait",
+        "show_secondary_image": false,
+        "show_vendor": false,
+        "show_rating": false,
+        "enable_filtering": false,
+        "enable_sorting": false,
+        "quick_add": "none",
+        "columns_mobile": "2",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    }
+  },
+  "order": [
+    "product-grid"
+  ]
+}
