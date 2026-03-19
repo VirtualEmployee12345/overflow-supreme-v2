@@ -705,3 +705,62 @@ footer a:hover { text-decoration: underline !important; }
   border-bottom: 1px solid #e8e8e8;
 }
 
+
+/* ═══════════════════════════════════════════════
+   CHECKOUT BUTTONS — force black text, no white-on-white
+═══════════════════════════════════════════════ */
+
+/* Shopify Pay / dynamic checkout buttons */
+.shopify-payment-button__button,
+.shopify-payment-button__button--unbranded {
+  background: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+.shopify-payment-button__button:hover {
+  background: #222 !important;
+  color: #fff !important;
+}
+
+/* "Buy it now" / express checkout wrapper */
+.shopify-payment-button {
+  margin-top: 8px;
+}
+
+/* Cart page checkout button */
+.cart__checkout-button,
+.cart__cta .button,
+button[name="checkout"],
+input[name="checkout"] {
+  background: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  padding: 14px 28px !important;
+  cursor: pointer;
+  transition: background 0.15s !important;
+}
+.cart__checkout-button:hover,
+button[name="checkout"]:hover {
+  background: #222 !important;
+  color: #fff !important;
+}
+
+/* Cart drawer checkout */
+.cart-drawer__checkout {
+  background: #000 !important;
+  color: #fff !important;
+  border-radius: 0 !important;
+}
+

@@ -7,14 +7,14 @@
 <footer class="footer footer-brutalist color-{{ section.settings.color_scheme }} gradient">
   <div class="footer-brutalist__inner">
     <div class="footer-brutalist__primary">
-      <a href="/collections/all" class="footer-brutalist__link">shop</a>
-      <a href="/collections/new" class="footer-brutalist__link">new arrivals</a>
-      <a href="/collections/all" class="footer-brutalist__link footer-brutalist__link--active">view all</a>
+      <a href="/" class="footer-brutalist__link{% if request.path == '/' %} footer-brutalist__link--active{% endif %}">home</a>
+      <a href="/pages/drops" class="footer-brutalist__link{% if request.path contains 'drops' %} footer-brutalist__link--active{% endif %}">drops</a>
+      <a href="/collections/all" class="footer-brutalist__link{% if collection.handle == 'all' %} footer-brutalist__link--active{% endif %}">view all</a>
     </div>
 
     <div class="footer-brutalist__secondary">
-      <a href="/collections/cameras" class="footer-brutalist__link">cameras</a>
-      <a href="/collections/tools" class="footer-brutalist__link">tools</a>
+      <a href="/collections/electronics" class="footer-brutalist__link">electronics</a>
+      <a href="/collections/kitchen" class="footer-brutalist__link">kitchen</a>
       <a href="/pages/about" class="footer-brutalist__link">about</a>
       <a href="/pages/contact" class="footer-brutalist__link">contact</a>
     </div>
@@ -35,36 +35,25 @@
     {
       "type": "range",
       "id": "margin_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
       "label": "Section top margin",
       "default": 0
     },
     {
       "type": "range",
       "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
       "label": "Section top padding",
       "default": 0
     },
     {
       "type": "range",
       "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
+      "min": 0, "max": 100, "step": 4, "unit": "px",
       "label": "Section bottom padding",
       "default": 0
     }
   ],
-  "blocks": [
-    { "type": "@app" }
-  ]
+  "blocks": [{ "type": "@app" }]
 }
 {% endschema %}
