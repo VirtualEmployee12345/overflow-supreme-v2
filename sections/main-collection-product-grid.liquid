@@ -158,16 +158,14 @@
   <aside class="supreme-sidebar" aria-label="Categories">
     <nav class="supreme-sidebar__nav">
       {%- liquid
-        assign categories = 'new,jackets,shirts,tops/sweaters,sweatshirts,pants,hats,bags,accessories,shoes,skate,all' | split: ','
-        assign handles = 'new,jackets,shirts,tops-sweaters,sweatshirts,pants,hats,bags,accessories,shoes,skate,all' | split: ','
+        assign categories = 'new,cameras,tools,electronics,kitchen,accessories,all' | split: ','
+        assign handles    = 'new,cameras,tools,electronics,kitchen,accessories,all' | split: ','
       -%}
       {%- for cat in categories -%}
         {%- assign handle = handles[forloop.index0] -%}
         {%- assign cat_url = '/collections/' | append: handle -%}
         {%- assign is_active = false -%}
         {%- if collection.handle == handle -%}
-          {%- assign is_active = true -%}
-        {%- elsif handle == 'all' and collection.handle == 'all' -%}
           {%- assign is_active = true -%}
         {%- endif -%}
         <a

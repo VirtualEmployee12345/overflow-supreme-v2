@@ -327,14 +327,84 @@ details[open] > .facets__display,
   padding: 0 !important;
 }
 
-/* Hide badges, quick-add buttons, ratings */
+/* Hide badges, quick-add on COLLECTION cards only */
 .card__badge,
 .card-information__button,
 .quick-add,
 .quick-add-modal__content,
-.product-form__submit,
-.card__media .deferred-media,
-.product-form { display: none !important; }
+.card__media .deferred-media { display: none !important; }
+
+/* ── Product page — Supreme-style add to cart ─────────────── */
+/* Keep product-form visible on product pages */
+.product-form { display: block !important; }
+
+.product-form__buttons .button,
+.product-form__submit {
+  background: var(--supreme-red) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-family: var(--supreme-font) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 10px 20px !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.product-form__buttons .button:hover,
+.product-form__submit:hover {
+  background: #b00018 !important;
+}
+
+/* Product page layout — Supreme style */
+.product--supreme {
+  font-family: var(--supreme-font) !important;
+}
+
+.product__title {
+  font-family: var(--supreme-font) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.product__text.caption-with-letter-spacing,
+.product__vendor {
+  font-size: 11px !important;
+  color: #888 !important;
+  text-transform: none !important;
+}
+
+.price--large,
+.product .price {
+  font-family: var(--supreme-font) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: #000 !important;
+  margin: 4px 0 12px 0 !important;
+}
+
+.product__description {
+  font-family: var(--supreme-font) !important;
+  font-size: 11px !important;
+  line-height: 1.6 !important;
+  color: #000 !important;
+  margin: 12px 0 !important;
+}
+
+/* Variant pills */
+.product-form__input label {
+  font-family: var(--supreme-font) !important;
+  font-size: 11px !important;
+  border-radius: 0 !important;
+  border-color: #000 !important;
+}
 
 /* ── Footer ───────────────────────────────────────────────── */
 .footer,
