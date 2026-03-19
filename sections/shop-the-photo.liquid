@@ -90,9 +90,6 @@
     width: 100%;
     height: auto;
     display: block;
-    max-height: 80vh;
-    object-fit: cover;
-    object-position: center;
   }
 
   /* ── Hotspot zones (large, direct-link) ── */
@@ -181,7 +178,7 @@
   @media (max-width: 600px) {
     .stp-hotspot-zone { width: 64px; height: 64px; }
     .stp-hotspot-zone::before { width: 18px; height: 18px; }
-    .stp-hero { max-height: 70vw; }
+    .stp-hero { width: 100%; height: auto; }
   }
 
   /* ── Product grid below photo ── */
@@ -351,3 +348,4 @@
   "presets": [{"name": "Shop the Photo"}]
 }
 {% endschema %}
+
