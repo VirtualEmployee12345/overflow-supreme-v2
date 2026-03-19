@@ -56,7 +56,7 @@
           "settings": {
             "heading": "Shipping & Returns",
             "icon": "truck",
-            "content": "Your product will be shipped ASAP. No Returns.",
+            "content": "<p>Your product will be shipped ASAP.</p><p>No Returns.</p>",
             "page": ""
           }
         },
