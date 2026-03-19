@@ -14,15 +14,14 @@
     ...
   ]
 
-  HOTSPOT UX:
-  - Each hotspot is a LARGE clickable anchor tag (~80×80px tap target)
-  - Clicking anywhere in it goes directly to /products/{handle}
-  - On hover, a compact label floats above (title + price only)
-  - No "view product" button required — the whole zone IS the link
+  FIX: metafield type=json → use | json filter to emit valid JSON string into <script>
 {% endcomment %}
 
-{%- assign hero_url       = collection.metafields.custom.hero_photo_url.value -%}
-{%- assign hotspots_json  = collection.metafields.custom.hotspots.value -%}
+{%- assign hero_url      = collection.metafields.custom.hero_photo_url.value -%}
+{%- assign hotspots_data = collection.metafields.custom.hotspots.value -%}
+
+{%- comment -%} Clean display title: remove dashes, strip "Drop " prefix formatting {%- endcomment -%}
+{%- assign display_title = collection.title | replace: '-', ' ' -%}
 
 <style>
   .drop-page {
@@ -46,6 +45,17 @@
     text-transform: uppercase;
     color: #000;
     margin: 0;
+  }
+  .drop-title-bar-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .drop-title-bar-links a {
+    font-size: 11px;
+    color: #000;
+    text-decoration: underline;
+    letter-spacing: 0.04em;
   }
   .drop-title-bar .drop-meta {
     font-size: 10px;
@@ -82,7 +92,7 @@
     -webkit-tap-highlight-color: rgba(212,2,29,0.2);
   }
 
-  /* Red pulsing dot in center of zone */
+  /* Red pulsing dot */
   .drop-hotspot-zone::before {
     content: '';
     position: absolute;
@@ -125,7 +135,7 @@
     opacity: 0;
   }
 
-  /* ── Hover label (floats above the dot) ── */
+  /* ── Hover label ── */
   .drop-hotspot-label {
     position: absolute;
     bottom: calc(50% + 18px);
@@ -146,11 +156,10 @@
     z-index: 30;
   }
   .drop-hotspot-label span {
-    color: #d4021d;
+    color: #aaa;
     margin-left: 6px;
     font-weight: 400;
   }
-  /* Arrow below label */
   .drop-hotspot-label::after {
     content: '';
     position: absolute;
@@ -159,22 +168,16 @@
     border: 5px solid transparent;
     border-top-color: #000;
   }
-
   .drop-hotspot-zone:hover .drop-hotspot-label,
   .drop-hotspot-zone:focus .drop-hotspot-label {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
 
-  /* Mobile: larger tap targets */
+  /* Mobile */
   @media (max-width: 600px) {
-    .drop-hotspot-zone {
-      width: 64px;
-      height: 64px;
-    }
-    .drop-hotspot-zone::before {
-      width: 18px; height: 18px;
-    }
+    .drop-hotspot-zone { width: 64px; height: 64px; }
+    .drop-hotspot-zone::before { width: 18px; height: 18px; }
     .drop-hero { max-height: 70vw; }
   }
 
@@ -204,7 +207,11 @@
     color: #000;
     margin: 0;
   }
-  .drop-grid-header a {
+  .drop-grid-header-links {
+    display: flex;
+    gap: 20px;
+  }
+  .drop-grid-header-links a {
     font-size: 11px;
     color: #000;
     text-decoration: underline;
@@ -242,32 +249,31 @@
     margin: 0 0 3px;
     line-height: 1.3;
   }
-  .drop-product-card-price {
-    font-size: 10px;
-    color: #000;
-  }
+  .drop-product-card-price { font-size: 10px; color: #000; }
 
   @media (max-width: 600px) {
-    .drop-product-grid {
-      grid-template-columns: repeat(2, 1fr);
-      padding: 0 12px;
-    }
+    .drop-product-grid { grid-template-columns: repeat(2, 1fr); padding: 0 12px; }
   }
 </style>
 
 <div class="drop-page">
 
   <div class="drop-title-bar">
-    <h1>{{ collection.title }}</h1>
-    <span class="drop-meta">{{ collection.products_count }} item{% if collection.products_count != 1 %}s{% endif %}</span>
+    <h1>{{ display_title }}</h1>
+    <div class="drop-title-bar-links">
+      <span class="drop-meta">{{ collection.products_count }} item{% if collection.products_count != 1 %}s{% endif %}</span>
+    </div>
   </div>
 
   {%- if hero_url != blank -%}
     <div class="drop-photo-wrapper" id="drop-wrapper">
-      <img class="drop-hero" src="{{ hero_url }}" alt="{{ collection.title }}" loading="eager" id="drop-hero-img">
-
-      {%- if hotspots_json != blank -%}
-        <script id="drop-hotspots-data" type="application/json">{{ hotspots_json }}</script>
+      <img class="drop-hero" src="{{ hero_url }}" alt="{{ display_title }}" loading="eager">
+      {%- if hotspots_data != blank -%}
+        {%- comment -%}
+          KEY FIX: use `| json` to serialize the Liquid object back to a valid JSON string.
+          Without this, Liquid renders the array as a Ruby-style object, not JSON.
+        {%- endcomment -%}
+        <script id="drop-hotspots-data" type="application/json">{{ hotspots_data | json }}</script>
       {%- endif -%}
     </div>
   {%- else -%}
@@ -277,7 +283,10 @@
   {%- if collection.products_count > 0 -%}
     <div class="drop-grid-header">
       <h2>Items in this drop</h2>
-      <a href="/collections/all">View all</a>
+      <div class="drop-grid-header-links">
+        <a href="/pages/drops">All drops</a>
+        <a href="/collections/all">Shop all</a>
+      </div>
     </div>
     <div class="drop-product-grid">
       {%- for product in collection.products -%}
@@ -304,12 +313,16 @@
   if (!wrapper || !dataEl) return;
 
   var hotspots;
-  try { hotspots = JSON.parse(dataEl.textContent.trim()); }
-  catch(e) { return; }
+  try {
+    var raw = dataEl.textContent.trim();
+    hotspots = JSON.parse(raw);
+  } catch(e) {
+    console.warn('Overflow: could not parse hotspots JSON', e);
+    return;
+  }
   if (!Array.isArray(hotspots) || hotspots.length === 0) return;
 
   hotspots.forEach(function(hs) {
-    // Each hotspot is a full <a> tag — clicking anywhere goes to product
     var zone = document.createElement('a');
     zone.className  = 'drop-hotspot-zone';
     zone.href       = '/products/' + hs.handle;
@@ -317,10 +330,9 @@
     zone.style.top  = hs.top  + '%';
     zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
 
-    // Label (hover only)
     var label = document.createElement('span');
-    label.className   = 'drop-hotspot-label';
-    label.innerHTML   = hs.title + '<span>' + hs.price + '</span>';
+    label.className = 'drop-hotspot-label';
+    label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
     zone.appendChild(label);
 
     wrapper.appendChild(zone);
