@@ -1,18 +1,10 @@
 {% comment %}
-  shop-the-photo.liquid — Homepage hero section
+  shop-the-photo.liquid — Homepage hero section (full-bleed)
   
-  AUTO-UPDATES to the most recent drop every time a new drop is added.
-  
-  Finds the latest drop collection (handle starts with "drop-") by iterating
-  all collections and picking the lexicographically largest handle.
-  Reads hero_photo_url + hotspots from that collection's metafields.
-  Falls back to section settings if no drop collections exist.
-  
-  Hotspot UX: large 80×80px clickable <a> zones — clicking goes directly
-  to /products/{handle}. Hover shows compact label with title + price.
+  Hero image fills 100vh edge-to-edge. Drop title, nav links and hotspot
+  dots are all overlaid on top of the photo. Product grid sits below.
 {% endcomment %}
 
-{%- comment -%} ── Find latest drop collection ── {%- endcomment -%}
 {%- assign latest_drop = nil -%}
 {%- assign latest_handle = '' -%}
 {%- for col in collections -%}
@@ -24,78 +16,102 @@
   {%- endif -%}
 {%- endfor -%}
 
-{%- comment -%} ── Pull data from latest drop ── {%- endcomment -%}
 {%- if latest_drop -%}
   {%- assign hero_url      = latest_drop.metafields.custom.hero_photo_url.value -%}
   {%- assign hotspots_data = latest_drop.metafields.custom.hotspots.value -%}
   {%- assign drop_title    = latest_drop.title | remove: '-' -%}
   {%- assign drop_url      = latest_drop.url -%}
-  {%- assign drop_count    = latest_drop.products_count -%}
 {%- else -%}
   {%- assign hero_url      = section.settings.photo_url -%}
   {%- assign hotspots_data = nil -%}
   {%- assign drop_title    = section.settings.heading | default: 'Shop the photo' -%}
   {%- assign drop_url      = '/collections/all' -%}
-  {%- assign drop_count    = 0 -%}
 {%- endif -%}
 
 <style>
+  /* ── Reset section so it bleeds edge-to-edge with no gaps ── */
   .stp-section {
-    background: #fff;
-    padding: 0 0 60px 0;
     font-family: Arial, Helvetica, sans-serif;
+    background: #fff;
   }
 
-  /* ── Header ── */
-  .stp-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 32px 24px 16px;
-    border-bottom: 1px solid #e8e8e8;
+  /* ── Full-bleed hero wrapper ── */
+  .stp-photo-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: #111;
+    display: block;
   }
-  .stp-header h2 {
+
+  /* Image fills entire wrapper */
+  .stp-hero {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  /* Subtle gradient at top so text is legible over bright photos */
+  .stp-photo-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.38) 0%,
+      rgba(0,0,0,0.10) 18%,
+      rgba(0,0,0,0) 36%
+    );
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* ── Overlay UI bar at top of hero ── */
+  .stp-overlay-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+  }
+
+  .stp-overlay-title {
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: #000;
-    margin: 0;
-  }
-  .stp-header h2 a {
-    color: #000;
+    color: #fff;
     text-decoration: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
   }
-  .stp-header h2 a:hover { color: #d4021d; }
-  .stp-header-links {
+  .stp-overlay-title:hover { opacity: 0.8; }
+
+  .stp-overlay-links {
     display: flex;
     gap: 20px;
     align-items: center;
   }
-  .stp-header-links a {
+  .stp-overlay-links a {
     font-size: 11px;
-    color: #000;
-    text-decoration: underline;
-    letter-spacing: 0.04em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    padding-bottom: 1px;
   }
+  .stp-overlay-links a:hover { border-bottom-color: #fff; }
 
-  /* ── Photo Wrapper ── */
-  .stp-photo-wrapper {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    background: #111;
-  }
-  .stp-hero {
-    width: 100%;
-    height: auto;
-    display: block;
-    max-height: 80vh;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  /* ── Hotspot zones (large, direct-link) ── */
+  /* ── Hotspot zones ── */
   .stp-hotspot-zone {
     position: absolute;
     width: 80px;
@@ -139,11 +155,9 @@
     background: #a80118;
   }
   .stp-hotspot-zone:hover::after,
-  .stp-hotspot-zone:focus::after {
-    animation: none; opacity: 0;
-  }
+  .stp-hotspot-zone:focus::after { animation: none; opacity: 0; }
 
-  /* Label on hover */
+  /* Hover label */
   .stp-hotspot-label {
     position: absolute;
     bottom: calc(50% + 18px);
@@ -173,18 +187,9 @@
     border-top-color: #000;
   }
   .stp-hotspot-zone:hover .stp-hotspot-label,
-  .stp-hotspot-zone:focus .stp-hotspot-label {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  .stp-hotspot-zone:focus .stp-hotspot-label { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  @media (max-width: 600px) {
-    .stp-hotspot-zone { width: 64px; height: 64px; }
-    .stp-hotspot-zone::before { width: 18px; height: 18px; }
-    .stp-hero { max-height: 70vw; }
-  }
-
-  /* ── Product grid below photo ── */
+  /* ── Product grid ── */
   .stp-grid-header {
     display: flex;
     align-items: baseline;
@@ -200,11 +205,7 @@
     color: #000;
     margin: 0;
   }
-  .stp-grid-links {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-  }
+  .stp-grid-links { display: flex; gap: 20px; align-items: center; }
   .stp-grid-links a {
     font-size: 11px;
     color: #000;
@@ -246,32 +247,40 @@
   .stp-product-card-price { font-size: 10px; color: #000; }
 
   @media (max-width: 600px) {
+    .stp-photo-wrapper { height: 100svh; }
+    .stp-hotspot-zone { width: 64px; height: 64px; }
+    .stp-hotspot-zone::before { width: 18px; height: 18px; }
     .stp-product-grid { grid-template-columns: repeat(2, 1fr); }
+    .stp-overlay-bar { padding: 16px 16px; }
   }
 </style>
 
 <section class="stp-section">
 
-  {%- comment -%} Header: drop title links to the drop, links on right {%- endcomment -%}
-  <div class="stp-header">
-    <h2><a href="{{ drop_url }}">{{ drop_title }}</a></h2>
-    <div class="stp-header-links">
-      <a href="/pages/drops">View all drops</a>
-      <a href="/collections/all">Shop all</a>
-    </div>
-  </div>
-
-  {%- comment -%} Hero photo + hotspots {%- endcomment -%}
   {%- if hero_url != blank -%}
     <div class="stp-photo-wrapper" id="stp-wrapper">
+
+      {%- comment -%} Full-bleed hero image {%- endcomment -%}
       <img class="stp-hero" src="{{ hero_url }}" alt="{{ drop_title }}" loading="eager">
+
+      {%- comment -%} Overlay: drop title + nav links {%- endcomment -%}
+      <div class="stp-overlay-bar">
+        <a class="stp-overlay-title" href="{{ drop_url }}">{{ drop_title }}</a>
+        <div class="stp-overlay-links">
+          <a href="/pages/drops">View all drops</a>
+          <a href="/collections/all">Shop all</a>
+        </div>
+      </div>
+
+      {%- comment -%} Hotspot data {%- endcomment -%}
       {%- if hotspots_data != blank -%}
         <script id="stp-hotspots-data" type="application/json">{{ hotspots_data | json }}</script>
       {%- endif -%}
+
     </div>
   {%- endif -%}
 
-  {%- comment -%} Product grid from latest drop {%- endcomment -%}
+  {%- comment -%} Product grid below hero {%- endcomment -%}
   {%- if latest_drop and latest_drop.products_count > 0 -%}
     <div class="stp-grid-header">
       <h3>{{ drop_title }}</h3>
@@ -302,12 +311,8 @@
   if (!wrapper || !dataEl) return;
 
   var hotspots;
-  try {
-    hotspots = JSON.parse(dataEl.textContent.trim());
-  } catch(e) {
-    console.warn('Overflow: hotspot parse error', e);
-    return;
-  }
+  try { hotspots = JSON.parse(dataEl.textContent.trim()); }
+  catch(e) { console.warn('Overflow: hotspot parse error', e); return; }
   if (!Array.isArray(hotspots) || hotspots.length === 0) return;
 
   hotspots.forEach(function(hs) {
@@ -322,7 +327,6 @@
     label.className = 'stp-hotspot-label';
     label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
     zone.appendChild(label);
-
     wrapper.appendChild(zone);
   });
 })();
@@ -351,4 +355,3 @@
   "presets": [{"name": "Shop the Photo"}]
 }
 {% endschema %}
-
