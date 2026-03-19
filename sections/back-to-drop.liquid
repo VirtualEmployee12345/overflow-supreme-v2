@@ -1,0 +1,142 @@
+{% comment %}
+  back-to-drop.liquid
+  A slim back-arrow bar shown at the top of every product page.
+  
+  Behaviour:
+  - JS reads document.referrer on load
+  - If the referrer is a /collections/drop-* URL → shows "← Drop YYYY-MM-DD" linking back
+  - If the referrer is any other collection → shows "← [collection name]" linking back  
+  - If no referrer (direct link) → shows "← shop" linking to the homepage
+  - Remembers the last drop via sessionStorage so the link survives page refreshes
+{% endcomment %}
+
+<style>
+  .back-bar {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 36px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fff;
+    position: relative;
+    z-index: 10;
+  }
+
+  .back-bar__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #000;
+    text-decoration: none;
+    line-height: 1;
+    transition: color 0.12s;
+  }
+
+  .back-bar__link:hover {
+    color: #d4021d;
+  }
+
+  /* Arrow SVG */
+  .back-bar__arrow {
+    display: block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+
+  .back-bar__link:hover .back-bar__arrow {
+    transform: translateX(-3px);
+  }
+</style>
+
+<div class="back-bar" id="back-bar">
+  <a class="back-bar__link" href="/" id="back-bar-link" aria-label="Go back">
+    <svg class="back-bar__arrow" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span id="back-bar-label">shop</span>
+  </a>
+</div>
+
+<script>
+(function() {
+  var SESSION_KEY = 'overflow_back_url';
+  var LABEL_KEY   = 'overflow_back_label';
+
+  var linkEl  = document.getElementById('back-bar-link');
+  var labelEl = document.getElementById('back-bar-label');
+  if (!linkEl || !labelEl) return;
+
+  // Helper: extract a readable label from a URL
+  function labelFromUrl(url) {
+    try {
+      var path = new URL(url).pathname;  // e.g. /collections/drop-2026-03-19b
+      var parts = path.split('/').filter(Boolean);
+      // /collections/drop-2026-03-19b → "drop 2026-03-19b"
+      if (parts[0] === 'collections' && parts[1]) {
+        return parts[1].replace(/-/g, ' ');
+      }
+      // /pages/something → "something"
+      if (parts[0] === 'pages' && parts[1]) {
+        return parts[1].replace(/-/g, ' ');
+      }
+      // root → "shop"
+      return 'shop';
+    } catch(e) {
+      return 'shop';
+    }
+  }
+
+  // Helper: is this URL on our store?
+  function isSameOrigin(url) {
+    try {
+      return new URL(url).hostname === window.location.hostname;
+    } catch(e) { return false; }
+  }
+
+  var backUrl   = '/';
+  var backLabel = 'shop';
+
+  var ref = document.referrer;
+
+  if (ref && isSameOrigin(ref) && !ref.includes('/products/')) {
+    // Came from somewhere on this store that isn't another product page
+    backUrl   = ref;
+    backLabel = labelFromUrl(ref);
+    // Persist for use after reload
+    try {
+      sessionStorage.setItem(SESSION_KEY, backUrl);
+      sessionStorage.setItem(LABEL_KEY,   backLabel);
+    } catch(e) {}
+  } else {
+    // No useful referrer — try sessionStorage (e.g. after a page refresh)
+    try {
+      var stored      = sessionStorage.getItem(SESSION_KEY);
+      var storedLabel = sessionStorage.getItem(LABEL_KEY);
+      if (stored && storedLabel) {
+        backUrl   = stored;
+        backLabel = storedLabel;
+      }
+    } catch(e) {}
+  }
+
+  linkEl.href      = backUrl;
+  labelEl.textContent = backLabel;
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Back to Drop",
+  "tag": "section",
+  "class": "section-back-bar",
+  "settings": [],
+  "presets": [{"name": "Back to Drop"}]
+}
+{% endschema %}
