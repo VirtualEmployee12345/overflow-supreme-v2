@@ -21,7 +21,7 @@
 {%- assign hotspots_data = collection.metafields.custom.hotspots.value -%}
 
 {%- comment -%} Clean display title: remove dashes, strip "Drop " prefix formatting {%- endcomment -%}
-{%- assign display_title = collection.title | replace: '-', ' ' -%}
+{%- assign display_title = collection.title | remove: '-' -%}
 
 <style>
   .drop-page {

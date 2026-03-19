@@ -28,7 +28,7 @@
 {%- if latest_drop -%}
   {%- assign hero_url      = latest_drop.metafields.custom.hero_photo_url.value -%}
   {%- assign hotspots_data = latest_drop.metafields.custom.hotspots.value -%}
-  {%- assign drop_title    = latest_drop.title | replace: '-', ' ' -%}
+  {%- assign drop_title    = latest_drop.title | remove: '-' -%}
   {%- assign drop_url      = latest_drop.url -%}
   {%- assign drop_count    = latest_drop.products_count -%}
 {%- else -%}

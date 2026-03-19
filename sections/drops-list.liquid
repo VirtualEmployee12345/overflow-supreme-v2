@@ -210,13 +210,13 @@
             class="drops-list__link"
             href="{{ col.url }}"
             data-hero="{{ hero_url }}"
-            data-title="{{ col.title | escape }}"
+            data-title="{{ col.title | remove: '-' | escape }}"
           >
             <span class="drops-list__name">
               {%- if drop_index == 0 -%}
                 <span class="drops-list__new-dot" title="Latest drop"></span>
               {%- endif -%}
-              {{ col.title }}
+              {{ col.title | remove: '-' }}
             </span>
             <span class="drops-list__meta">
               <span class="drops-list__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>

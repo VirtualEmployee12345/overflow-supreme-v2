@@ -149,7 +149,7 @@
   // Parse each entry
   var drops = rawDrops.map(function(d) {
     var parts = d.split('::');
-    return { handle: parts[0], title: parts[1].replace(/-/g, ' '), url: parts[2] };
+    return { handle: parts[0], title: parts[1].replace(/-/g, ''), url: parts[2] };
   });
 
   // Sort chronologically by handle (lexicographic works for drop-YYYY-MM-DD*)
