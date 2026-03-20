@@ -1,0 +1,542 @@
+{% comment %}
+  supreme-cart-override.liquid
+  Injects Supreme-style product page overrides:
+  - Reorders info blocks (description above buy button)
+  - Custom add-to-cart button behavior (✓ in cart + ✗ remove)
+  - Mini cart popup (top-left: item count, subtotal, view/edit cart, checkout now)
+  - Hides collapsible rows, share, vendor subtitle clutter
+  - Mobile: full-width stacked layout matching Supreme mobile
+{% endcomment %}
+
+<style>
+  /* ══════════════════════════════════════════════
+     SUPREME PRODUCT PAGE OVERRIDES
+     ══════════════════════════════════════════════ */
+
+  /* ── Hide Dawn clutter ── */
+  .product .product__info-container .share-button,
+  .product .product__info-container [class*="collapsible"],
+  .product .product__info-container .product__text[data-block-type="text"][class*="subtitle"],
+  .product .product__info-container .product-form__quantity,
+  .product .product__info-container .icon-accordion {
+    display: none !important;
+  }
+
+  /* ── Force image LEFT on desktop (Dawn product--left) ── */
+  @media (min-width: 750px) {
+    .product.grid--2-col-tablet {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .product .product__media-wrapper {
+      order: 1 !important;
+    }
+    .product .product__info-wrapper {
+      order: 2 !important;
+    }
+  }
+
+  /* ── Product info typography — Supreme style ── */
+  .product__title h1,
+  .product__title .h1 {
+    font-family: 'Times New Roman', Times, Georgia, serif !important;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    line-height: 1.3 !important;
+    color: #000 !important;
+  }
+
+  /* ── Price ── */
+  .price--supreme .price-item {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    color: #000 !important;
+  }
+
+  /* ── Description ── */
+  .product__description {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    color: #000 !important;
+  }
+
+  /* ── Supreme-style Add to Cart button ── */
+  .product-form__submit.product-form__submit--supreme {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: lowercase !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 0 !important;
+    min-height: 42px !important;
+    padding: 10px 20px !important;
+    transition: background 0.15s, color 0.15s, border-color 0.15s !important;
+    cursor: pointer !important;
+  }
+
+  /* Default state: red bg, white text */
+  .product-form__submit.product-form__submit--supreme:not(:disabled):not(.sco-in-cart) {
+    background: #d4021d !important;
+    color: #fff !important;
+    border: 2px solid #d4021d !important;
+  }
+  .product-form__submit.product-form__submit--supreme:not(:disabled):not(.sco-in-cart):hover {
+    background: #a80118 !important;
+    border-color: #a80118 !important;
+  }
+
+  /* ✓ In cart state */
+  .product-form__submit.product-form__submit--supreme.sco-in-cart {
+    background: #fff !important;
+    color: #d4021d !important;
+    border: 2px solid #d4021d !important;
+    pointer-events: none !important;
+  }
+
+  /* Sold out state */
+  .product-form__submit.product-form__submit--supreme:disabled {
+    background: #888 !important;
+    color: #fff !important;
+    border: 2px solid #888 !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+  }
+
+  /* ── Remove button (appears after add-to-cart) ── */
+  .sco-remove-btn {
+    display: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    background: #333;
+    color: #fff;
+    border: 2px solid #333;
+    border-radius: 0;
+    min-height: 42px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+    margin-top: 6px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .sco-remove-btn:hover {
+    background: #000;
+    border-color: #000;
+  }
+  .sco-remove-btn.sco-visible {
+    display: flex;
+  }
+  .sco-remove-btn svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ── Keep Shopping button ── */
+  .sco-keep-shopping {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    background: #000;
+    color: #fff;
+    border: 2px solid #000;
+    border-radius: 0;
+    min-height: 42px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .sco-keep-shopping:hover {
+    background: #333;
+    border-color: #333;
+    color: #fff;
+  }
+
+  /* ── Button row layout (desktop: side by side) ── */
+  @media (min-width: 750px) {
+    .product-form__buttons {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+    }
+    .product-form__submit.product-form__submit--supreme {
+      flex: 1 1 48% !important;
+      width: auto !important;
+    }
+    .sco-keep-shopping {
+      flex: 1 1 48% !important;
+      width: auto !important;
+      margin-top: 0 !important;
+    }
+    .sco-remove-btn.sco-visible {
+      flex: 1 1 100% !important;
+      width: auto !important;
+      margin-top: 0 !important;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     MINI CART POPUP (top-left on desktop)
+     ══════════════════════════════════════════════ */
+  .sco-mini-cart {
+    position: fixed;
+    top: 50px;
+    left: 20px;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 0;
+    width: 220px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    display: none;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  .sco-mini-cart.sco-visible {
+    display: block;
+  }
+  .sco-mini-cart__count {
+    background: #000;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: lowercase;
+    padding: 8px 14px;
+    letter-spacing: 0.02em;
+  }
+  .sco-mini-cart__subtotal {
+    font-size: 12px;
+    padding: 8px 14px;
+    color: #000;
+    border-bottom: 1px solid #eee;
+  }
+  .sco-mini-cart__subtotal strong {
+    font-weight: 700;
+  }
+  .sco-mini-cart__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .sco-mini-cart__btn {
+    display: block;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    padding: 10px 14px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+  }
+  .sco-mini-cart__btn--view {
+    background: #000;
+    color: #fff;
+  }
+  .sco-mini-cart__btn--view:hover {
+    background: #333;
+    color: #fff;
+  }
+  .sco-mini-cart__btn--checkout {
+    background: #d4021d;
+    color: #fff;
+  }
+  .sco-mini-cart__btn--checkout:hover {
+    background: #a80118;
+    color: #fff;
+  }
+
+  /* ── Mobile: mini cart is bottom sheet instead ── */
+  @media (max-width: 749px) {
+    .sco-mini-cart {
+      top: auto;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      border: none;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+    }
+    .sco-mini-cart__actions {
+      flex-direction: row;
+    }
+    .sco-mini-cart__btn {
+      flex: 1;
+    }
+
+    /* Mobile button layout: side by side */
+    .product-form__buttons {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 0 !important;
+    }
+    .product-form__submit.product-form__submit--supreme {
+      flex: 1 1 50% !important;
+    }
+    .sco-remove-btn.sco-visible {
+      flex: 1 1 50% !important;
+      margin-top: 0 !important;
+    }
+  }
+
+  /* ── Reorder info blocks via flexbox ── */
+  .product__info-container {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  /* Title first */
+  .product__info-container > .product__title { order: 1 !important; }
+  /* Description second */
+  .product__info-container > .product__description { order: 2 !important; margin-bottom: 12px !important; }
+  /* Price third */
+  .product__info-container > .product__price-block,
+  .product__info-container > [id^="price-"] { order: 3 !important; }
+  /* Buy buttons last */
+  .product__info-container > [data-block-type="buy_buttons"],
+  .product__info-container > product-form,
+  .product__info-container > div:has(.product-form) { order: 4 !important; }
+  /* Vendor line */
+  .product__info-container > .product__text:first-child { order: 0 !important; }
+
+  /* ── Remove padding from page-width to let it breathe ── */
+  .section-main-product .page-width {
+    padding-top: 0 !important;
+  }
+</style>
+
+<!-- Mini Cart Popup HTML -->
+<div class="sco-mini-cart" id="sco-mini-cart">
+  <div class="sco-mini-cart__count" id="sco-cart-count">0 items in cart</div>
+  <div class="sco-mini-cart__subtotal">subtotal <strong id="sco-cart-subtotal">$0</strong></div>
+  <div class="sco-mini-cart__actions">
+    <a href="/cart" class="sco-mini-cart__btn sco-mini-cart__btn--view">view/edit cart</a>
+    <a href="/checkout" class="sco-mini-cart__btn sco-mini-cart__btn--checkout">checkout now</a>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Helpers ── */
+  function formatMoney(cents) {
+    return '$' + (cents / 100).toFixed(0);
+  }
+
+  function fetchCart() {
+    return fetch('/cart.js', { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); });
+  }
+
+  function addToCart(variantId, qty) {
+    return fetch('/cart/add.js', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ id: variantId, quantity: qty || 1 }] })
+    }).then(function(r) { return r.json(); });
+  }
+
+  function removeFromCart(lineKey) {
+    return fetch('/cart/change.js', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: lineKey, quantity: 0 })
+    }).then(function(r) { return r.json(); });
+  }
+
+  /* ── DOM refs ── */
+  var miniCart     = document.getElementById('sco-mini-cart');
+  var cartCountEl  = document.getElementById('sco-cart-count');
+  var cartSubEl    = document.getElementById('sco-cart-subtotal');
+  var submitBtn    = document.querySelector('.product-form__submit--supreme');
+  var formButtons  = submitBtn ? submitBtn.closest('.product-form__buttons') : null;
+
+  if (!submitBtn || !formButtons) return;
+
+  /* ── Get variant ID ── */
+  var variantInput = submitBtn.closest('form')
+    ? submitBtn.closest('form').querySelector('.product-variant-id')
+    : null;
+
+  function getVariantId() {
+    return variantInput ? parseInt(variantInput.value, 10) : null;
+  }
+
+  /* ── Create Remove button ── */
+  var removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'sco-remove-btn';
+  removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L10 10M10 2L2 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> remove';
+  formButtons.appendChild(removeBtn);
+
+  /* ── Create Keep Shopping button ── */
+  var keepBtn = document.createElement('a');
+  keepBtn.href = '/collections/all';
+  keepBtn.className = 'sco-keep-shopping';
+  keepBtn.textContent = 'keep shopping';
+  formButtons.appendChild(keepBtn);
+
+  /* ── Update mini cart display ── */
+  function updateMiniCart(cart) {
+    if (!miniCart) return;
+    var count = cart.item_count;
+    cartCountEl.textContent = count + (count === 1 ? ' item in cart' : ' items in cart');
+    cartSubEl.textContent = formatMoney(cart.total_price);
+  }
+
+  function showMiniCart() {
+    if (miniCart) miniCart.classList.add('sco-visible');
+  }
+  function hideMiniCart() {
+    if (miniCart) miniCart.classList.remove('sco-visible');
+  }
+
+  /* ── Button state management ── */
+  var currentLineKey = null;
+
+  function setInCartState() {
+    submitBtn.classList.add('sco-in-cart');
+    submitBtn.innerHTML = '<span>✓ in cart</span>';
+    removeBtn.classList.add('sco-visible');
+  }
+
+  function setDefaultState() {
+    submitBtn.classList.remove('sco-in-cart');
+    submitBtn.innerHTML = '<span>add to cart</span>';
+    removeBtn.classList.remove('sco-visible');
+    currentLineKey = null;
+  }
+
+  /* ── Check if current variant is already in cart ── */
+  function checkCartForVariant() {
+    var vid = getVariantId();
+    if (!vid) return;
+    fetchCart().then(function(cart) {
+      var found = false;
+      for (var i = 0; i < cart.items.length; i++) {
+        if (cart.items[i].variant_id === vid) {
+          currentLineKey = cart.items[i].key;
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        setInCartState();
+        updateMiniCart(cart);
+        showMiniCart();
+      }
+    });
+  }
+
+  /* ── Intercept the Dawn form submission ── */
+  var productForm = submitBtn.closest('product-form');
+  if (productForm) {
+    var form = productForm.querySelector('form[data-type="add-to-cart-form"]');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        if (submitBtn.classList.contains('sco-in-cart') || submitBtn.disabled) return;
+
+        var vid = getVariantId();
+        if (!vid) return;
+
+        submitBtn.innerHTML = '<span>adding...</span>';
+        submitBtn.disabled = true;
+
+        addToCart(vid, 1).then(function() {
+          return fetchCart();
+        }).then(function(cart) {
+          submitBtn.disabled = false;
+          // Find the line key for this variant
+          for (var i = 0; i < cart.items.length; i++) {
+            if (cart.items[i].variant_id === vid) {
+              currentLineKey = cart.items[i].key;
+              break;
+            }
+          }
+          setInCartState();
+          updateMiniCart(cart);
+          showMiniCart();
+        }).catch(function() {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>add to cart</span>';
+        });
+      }, true); // capture phase to beat Dawn's handler
+    }
+  }
+
+  /* ── Remove button handler ── */
+  removeBtn.addEventListener('click', function() {
+    if (!currentLineKey) return;
+    removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L10 10M10 2L2 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> removing...';
+
+    removeFromCart(currentLineKey).then(function(cart) {
+      setDefaultState();
+      updateMiniCart(cart);
+      if (cart.item_count === 0) {
+        hideMiniCart();
+      }
+    }).catch(function() {
+      removeBtn.innerHTML = '<svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L10 10M10 2L2 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> remove';
+    });
+  });
+
+  /* ── Dismiss mini cart on scroll or click outside ── */
+  var miniCartTimeout;
+  document.addEventListener('click', function(e) {
+    if (miniCart && miniCart.classList.contains('sco-visible')) {
+      if (!miniCart.contains(e.target) && !formButtons.contains(e.target)) {
+        hideMiniCart();
+      }
+    }
+  });
+
+  /* Auto-dismiss after 5 seconds */
+  var observer = new MutationObserver(function() {
+    if (miniCart.classList.contains('sco-visible')) {
+      clearTimeout(miniCartTimeout);
+      miniCartTimeout = setTimeout(function() {
+        hideMiniCart();
+      }, 5000);
+    }
+  });
+  observer.observe(miniCart, { attributes: true, attributeFilter: ['class'] });
+
+  /* ── Init: check if variant is already in cart ── */
+  checkCartForVariant();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Supreme Cart Override",
+  "tag": "section",
+  "class": "section-supreme-cart-override",
+  "settings": [],
+  "templates": ["product"],
+  "presets": [{"name": "Supreme Cart Override"}]
+}
+{% endschema %}
