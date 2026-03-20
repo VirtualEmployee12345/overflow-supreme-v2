@@ -7,7 +7,7 @@
     display: grid;
     grid-template-columns: 130px 1fr;
     min-height: 60vh;
-    background: #000;
+    background: #fff;
   }
 
   @media screen and (max-width: 749px) {
@@ -20,7 +20,7 @@
   /* ── Sidebar ── */
   .supreme-sidebar {
     padding: 18px 0 18px 20px;
-    background: #000;
+    background: #fff;
   }
 
   .supreme-sidebar__nav {
@@ -34,7 +34,7 @@
     font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
     font-size: 11px;
     font-weight: 400;
-    color: #fff;
+    color: #000;
     text-decoration: none;
     text-align: right;
     display: block;
@@ -49,18 +49,18 @@
 
   /* ── Product Grid ── */
   .supreme-grid-area {
-    background: #000;
+    background: #fff;
     padding: 0;
   }
 
   .product-grid--supreme {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 2px;
+    gap: 1px;
     padding: 0;
     margin: 0;
     list-style: none;
-    background: #000;
+    background: #fff;
   }
 
   @media screen and (max-width: 900px) {
@@ -72,13 +72,13 @@
 
   .product-grid--supreme .grid__item {
     display: block;
-    background: #000;
+    background: #fff;
   }
 
   /* ── Full-Bleed Product Card with Hover Overlay ── */
   .supreme-product-card {
     display: block;
-    background: #000;
+    background: #fff;
     border: none;
     padding: 0;
     cursor: pointer;
@@ -87,7 +87,7 @@
 
   .supreme-product-card__image-wrap {
     display: block;
-    background: #111;
+    background: #f5f5f5;
     overflow: hidden;
     aspect-ratio: 1 / 1;
     position: relative;
@@ -112,7 +112,7 @@
     left: 0;
     right: 0;
     padding: 40px 10px 10px 10px;
-    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%);
+    background: linear-gradient(to top, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%);
     opacity: 0;
     transition: opacity 0.25s ease;
     pointer-events: none;
@@ -136,7 +136,7 @@
     font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
     font-size: 12px;
     font-weight: 400;
-    color: #fff;
+    color: #000;
     margin: 0 0 2px 0;
     line-height: 1.3;
     text-decoration: none;
@@ -147,25 +147,25 @@
     font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
     font-size: 12px;
     font-weight: 400;
-    color: #fff;
+    color: #000;
     margin: 0;
     display: block;
   }
 
   .supreme-product-card__sold-out {
     font-size: 12px;
-    color: #999;
+    color: #aaa;
   }
 
   /* ── Loading ── */
-  .loading-overlay { background: #000 !important; }
+  .loading-overlay { background: #fff !important; }
 
   /* ── Empty state ── */
   .supreme-empty {
     padding: 40px 20px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
-    color: #fff;
+    color: #000;
   }
 {%- endstyle -%}
 
@@ -320,3 +320,4 @@
   ]
 }
 {% endschema %}
+
