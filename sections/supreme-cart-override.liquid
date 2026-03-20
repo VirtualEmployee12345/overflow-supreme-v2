@@ -18,7 +18,14 @@
   .product .product__info-container [class*="collapsible"],
   .product .product__info-container .product__text[data-block-type="text"][class*="subtitle"],
   .product .product__info-container .product-form__quantity,
-  .product .product__info-container .icon-accordion {
+  .product .product__info-container .icon-accordion,
+  .product .product__info-container .product__text:not(.product__title):not(.product__description) {
+    display: none !important;
+  }
+
+  /* ── Hide Dawn's loading spinner inside button ── */
+  .product-form__submit--supreme .loading__spinner,
+  .product-form__submit--supreme .loading-overlay__spinner {
     display: none !important;
   }
 
@@ -37,7 +44,9 @@
 
   /* ── Product info typography — Supreme style ── */
   .product__title h1,
-  .product__title .h1 {
+  .product__title .h1,
+  h1.product__title,
+  .product__info-container h1 {
     font-family: 'Times New Roman', Times, Georgia, serif !important;
     font-size: 22px !important;
     font-weight: 400 !important;
@@ -45,6 +54,12 @@
     text-transform: none !important;
     line-height: 1.3 !important;
     color: #000 !important;
+  }
+
+  /* Hide "USD" currency code — Supreme only shows $ symbol */
+  .price .price-item .currency-code,
+  .price .money + .currency-code {
+    display: none !important;
   }
 
   /* ── Price ── */
@@ -171,22 +186,25 @@
   /* ── Button row layout (desktop: side by side) ── */
   @media (min-width: 750px) {
     .product-form__buttons {
-      display: flex !important;
-      flex-wrap: wrap !important;
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
       gap: 6px !important;
     }
     .product-form__submit.product-form__submit--supreme {
-      flex: 1 1 48% !important;
-      width: auto !important;
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      width: 100% !important;
     }
     .sco-keep-shopping {
-      flex: 1 1 48% !important;
-      width: auto !important;
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      width: 100% !important;
       margin-top: 0 !important;
     }
     .sco-remove-btn.sco-visible {
-      flex: 1 1 100% !important;
-      width: auto !important;
+      grid-column: 1 !important;
+      grid-row: 2 !important;
+      width: 100% !important;
       margin-top: 0 !important;
     }
   }
@@ -264,37 +282,35 @@
     color: #fff;
   }
 
-  /* ── Mobile: mini cart is bottom sheet instead ── */
+  /* ── Mobile overrides ── */
   @media (max-width: 749px) {
+    /* Mobile: no floating mini cart (matches Supreme mobile — inline feedback only) */
     .sco-mini-cart {
-      top: auto;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      border: none;
-      border-top: 1px solid #ddd;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
-    }
-    .sco-mini-cart__actions {
-      flex-direction: row;
-    }
-    .sco-mini-cart__btn {
-      flex: 1;
+      display: none !important;
     }
 
-    /* Mobile button layout: side by side */
+    /* Mobile button layout: ✓ in cart + ✗ remove side by side */
     .product-form__buttons {
-      display: flex !important;
-      flex-wrap: wrap !important;
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
       gap: 0 !important;
     }
     .product-form__submit.product-form__submit--supreme {
-      flex: 1 1 50% !important;
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      border-radius: 0 !important;
+    }
+    /* When in cart: button takes half, remove takes half */
+    .product-form__submit.product-form__submit--supreme.sco-in-cart {
+      grid-column: 1 !important;
     }
     .sco-remove-btn.sco-visible {
-      flex: 1 1 50% !important;
+      grid-column: 2 !important;
+      grid-row: 1 !important;
       margin-top: 0 !important;
+    }
+    .sco-keep-shopping {
+      display: none !important;
     }
   }
 
