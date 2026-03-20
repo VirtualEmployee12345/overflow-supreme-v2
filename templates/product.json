@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -11,7 +20,8 @@
           }
         },
         "title": {
-          "type": "title"
+          "type": "title",
+          "settings": {}
         },
         "caption": {
           "type": "text",
@@ -21,7 +31,8 @@
           }
         },
         "price": {
-          "type": "price"
+          "type": "price",
+          "settings": {}
         },
         "variant_picker": {
           "type": "variant_picker",
@@ -29,18 +40,17 @@
             "picker_type": "button"
           }
         },
-        "quantity_selector": {
-          "type": "quantity_selector"
-        },
+
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
-            "show_dynamic_checkout": true,
+            "show_dynamic_checkout": false,
             "show_gift_card_recipient": true
           }
         },
         "description": {
-          "type": "description"
+          "type": "description",
+          "settings": {}
         },
         "collapsible-row-0": {
           "type": "collapsible_tab",
@@ -56,7 +66,7 @@
           "settings": {
             "heading": "Shipping & Returns",
             "icon": "truck",
-            "content": "<p>Your product will be shipped ASAP.</p><p>No Returns.</p>",
+            "content": "<p>Your product will be shipped ASAP.<\/p><p>No Returns.<\/p>",
             "page": ""
           }
         },
@@ -91,7 +101,6 @@
         "caption",
         "price",
         "variant_picker",
-        "quantity_selector",
         "buy_buttons",
         "description",
         "collapsible-row-0",
@@ -102,15 +111,15 @@
       ],
       "settings": {
         "enable_sticky_info": false,
-        "gallery_layout": "stacked",
         "media_size": "large",
         "constrain_to_viewport": true,
+        "gallery_layout": "stacked",
         "mobile_thumbnails": "hide",
+        "media_position": "right",
         "hide_variants": true,
         "enable_video_looping": false,
         "padding_top": 36,
-        "padding_bottom": 12,
-        "media_position": "right"
+        "padding_bottom": 12
       }
     },
     "related-products": {
@@ -119,12 +128,12 @@
         "heading": "You may also like",
         "heading_size": "h2",
         "columns_desktop": 4,
+        "columns_mobile": "2",
         "color_scheme": "scheme-1",
         "image_ratio": "square",
         "show_secondary_image": true,
         "show_vendor": false,
         "show_rating": false,
-        "columns_mobile": "2",
         "padding_top": 36,
         "padding_bottom": 28
       }
@@ -140,3 +149,4 @@
     "related-products"
   ]
 }
+
