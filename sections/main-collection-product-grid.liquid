@@ -177,6 +177,44 @@
     color: #000;
   }
 
+  /* ── Mobile Category Dropdown (hidden on desktop) ── */
+  .supreme-mobile-filter {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .supreme-mobile-filter {
+      display: block;
+      padding: 10px 0 6px;
+    }
+
+    .supreme-mobile-filter__select {
+      width: 100%;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: lowercase;
+      color: #000;
+      background: #fff;
+      border: 1px solid #000;
+      border-radius: 0;
+      padding: 8px 10px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 10px 6px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .supreme-mobile-filter__select:focus {
+      border-color: #000;
+    }
+  }
+
   /* ── Random > button in grid header ── */
   .supreme-grid-header {
     display: flex;
@@ -253,6 +291,25 @@
   {%- comment -%} ── Product Grid ── {%- endcomment -%}
   <div class="supreme-grid-area">
     <div class="loading-overlay gradient"></div>
+
+    {%- comment -%} ── Mobile Category Dropdown ── {%- endcomment -%}
+    <div class="supreme-mobile-filter">
+      <select class="supreme-mobile-filter__select" aria-label="Filter by category" onchange="if(this.value) window.location.href=this.value;">
+        <option value="/collections/new"{% if collection.handle == 'new' %} selected{% endif %}>new</option>
+        {%- for col in collections -%}
+          {%- assign h = col.handle -%}
+          {%- assign skip = false -%}
+          {%- if h contains 'drop-' -%}{%- assign skip = true -%}{%- endif -%}
+          {%- for sys in system_handles -%}
+            {%- if h == sys -%}{%- assign skip = true -%}{%- endif -%}
+          {%- endfor -%}
+          {%- unless skip -%}
+            <option value="{{ col.url }}"{% if collection.handle == h %} selected{% endif %}>{{ col.title | downcase }}</option>
+          {%- endunless -%}
+        {%- endfor -%}
+        <option value="/collections/all"{% if collection.handle == 'all' %} selected{% endif %}>all</option>
+      </select>
+    </div>
 
     {%- comment -%} Random > button — collect drop handles {%- endcomment -%}
     {%- assign drop_list = '' -%}
