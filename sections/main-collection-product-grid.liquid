@@ -1,5 +1,5 @@
-<!-- v4 -->
 {{ 'template-collection.css' | asset_url | stylesheet_tag }}
+{{ 'supreme-grid-override.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   /* Supreme-style two-column layout: sidebar + grid */
@@ -70,13 +70,9 @@
     .product-grid--supreme { grid-template-columns: repeat(2, 1fr); }
   }
 
-  .product-grid--supreme > li {
+  .product-grid--supreme .grid__item {
     display: block;
     background: #000;
-    max-width: none;
-    width: auto;
-    padding: 0;
-    margin: 0;
   }
 
   /* ── Full-Bleed Product Card with Hover Overlay ── */
@@ -234,7 +230,7 @@
         {%- for product in collection.products -%}
           {%- assign lazy_load = true -%}
           {%- if forloop.index <= 8 -%}{%- assign lazy_load = false -%}{%- endif -%}
-          <li class="supreme-grid-item">
+          <li class="grid__item">
             <a href="{{ product.url }}" class="supreme-product-card" aria-label="{{ product.title | escape }}">
               <div class="supreme-product-card__image-wrap">
                 {%- if product.featured_media -%}
