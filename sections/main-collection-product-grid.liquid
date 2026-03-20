@@ -7,6 +7,19 @@
      – Hover: thin border (available) or "sold out" overlay
      ═══════════════════════════════════════════════════ */
 
+  /* Force white everywhere — override theme color scheme */
+  #shopify-section-{{ section.id }},
+  #shopify-section-{{ section.id }} * {
+    --color-background: 255,255,255;
+  }
+
+  #MainContent,
+  .shopify-section,
+  #shopify-section-{{ section.id }} {
+    background: #fff !important;
+    background-color: #fff !important;
+  }
+
   /* Two-column layout: sidebar + grid */
   .supreme-collection-layout {
     display: grid;
