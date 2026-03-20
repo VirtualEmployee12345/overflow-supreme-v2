@@ -69,9 +69,13 @@
     .product-grid--supreme { grid-template-columns: repeat(2, 1fr); }
   }
 
-  .product-grid--supreme .grid__item {
+  .product-grid--supreme > li {
     display: block;
     background: #000;
+    max-width: none;
+    width: auto;
+    padding: 0;
+    margin: 0;
   }
 
   /* ── Full-Bleed Product Card with Hover Overlay ── */
@@ -168,21 +172,6 @@
   }
 {%- endstyle -%}
 
-<style>
-  /* Override Dawn base.css grid__item max-width constraint */
-  .product-grid--supreme .grid__item {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  /* Kill any Dawn card wrapper constraints */
-  .product-grid--supreme .card-wrapper,
-  .product-grid--supreme .card {
-    max-width: 100% !important;
-  }
-</style>
-
 {%- paginate collection.products by section.settings.products_per_page -%}
 
 <div class="supreme-collection-layout">
@@ -244,7 +233,7 @@
         {%- for product in collection.products -%}
           {%- assign lazy_load = true -%}
           {%- if forloop.index <= 8 -%}{%- assign lazy_load = false -%}{%- endif -%}
-          <li class="grid__item">
+          <li class="supreme-grid-item">
             <a href="{{ product.url }}" class="supreme-product-card" aria-label="{{ product.title | escape }}">
               <div class="supreme-product-card__image-wrap">
                 {%- if product.featured_media -%}
