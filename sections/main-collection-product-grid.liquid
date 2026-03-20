@@ -424,7 +424,7 @@
           {%- assign lazy_load = true -%}
           {%- if forloop.index <= 8 -%}{%- assign lazy_load = false -%}{%- endif -%}
           <li class="grid__item">
-            <a href="{{ product.url }}" class="supreme-product-card" aria-label="{{ product.title | escape }}">
+            <a href="{{ product.url }}" class="supreme-product-card" aria-label="{{ product.title | escape }}" data-product-title="{{ product.title | escape }}" data-product-price="{{ product.price | money }}" data-product-available="{{ product.available }}">
               <div class="supreme-product-card__image-wrap">
                 {%- if product.featured_media -%}
                   <img
@@ -452,14 +452,6 @@
                 {%- endunless -%}
               </div>
             </a>
-              <div class="supreme-product-card__info">
-                <span class="supreme-product-card__title">{{ product.title }}</span>
-                {%- if product.available -%}
-                  <span class="supreme-product-card__price">{{ product.price | money }}</span>
-                {%- else -%}
-                  <span class="supreme-product-card__sold-out-label">sold out</span>
-                {%- endif -%}
-              </div>
           </li>
         {%- endfor -%}
         {%- comment -%} Fill remaining cells in last row with white fillers {%- endcomment -%}
@@ -480,6 +472,36 @@
 </div>
 
 {%- endpaginate -%}
+
+<script>
+(function() {
+  document.querySelectorAll('.supreme-product-card[data-product-title]').forEach(function(card) {
+    var li = card.closest('.grid__item');
+    if (!li || li.querySelector('.supreme-product-card__info')) return;
+    var title = card.getAttribute('data-product-title');
+    var price = card.getAttribute('data-product-price');
+    var available = card.getAttribute('data-product-available') === 'true';
+    var info = document.createElement('div');
+    info.className = 'supreme-product-card__info';
+    var titleSpan = document.createElement('span');
+    titleSpan.className = 'supreme-product-card__title';
+    titleSpan.textContent = title;
+    info.appendChild(titleSpan);
+    if (available) {
+      var priceSpan = document.createElement('span');
+      priceSpan.className = 'supreme-product-card__price';
+      priceSpan.textContent = price;
+      info.appendChild(priceSpan);
+    } else {
+      var soldOut = document.createElement('span');
+      soldOut.className = 'supreme-product-card__sold-out-label';
+      soldOut.textContent = 'sold out';
+      info.appendChild(soldOut);
+    }
+    li.appendChild(info);
+  });
+})();
+</script>
 
 {% schema %}
 {
