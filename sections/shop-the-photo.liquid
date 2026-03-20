@@ -269,13 +269,17 @@
   .stp-product-card-price { font-size: 10px; color: #000; }
 
   @media (max-width: 600px) {
-    .stp-photo-wrapper { height: auto; }
+    .stp-photo-wrapper {
+      height: auto;
+      overflow: visible;
+    }
     .stp-hero {
       position: relative;
       inset: auto;
       width: 100%;
       height: auto;
       object-fit: contain;
+      object-position: center;
     }
     .stp-hotspot-zone { width: 64px; height: 64px; }
     .stp-hotspot-zone::before { width: 18px; height: 18px; }
