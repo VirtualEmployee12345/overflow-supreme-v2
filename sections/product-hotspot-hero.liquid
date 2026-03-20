@@ -1,26 +1,27 @@
 {% comment %}
-  product-hotspot-hero.liquid
-  "You May Also Like" section for product pages.
-  Shows the hero photo with hotspots from the product's parent drop collection.
-
-  How it works:
-  1. Iterates product.collections to find the drop-* collection
-  2. Reads custom.hero_photo_url and custom.hotspots metafields
-  3. Renders a full-bleed hero with pulsing hotspot dots
+  product-hotspot-hero.liquid — v2
+  Shows ALL drop-collection hero photos with hotspots,
+  shuffled into a random order on every page load.
+  Also includes a "RANDOM >" button in the top-right that
+  navigates to a random drop collection page.
 {% endcomment %}
 
-{%- assign drop_collection = nil -%}
-{%- for col in product.collections -%}
-  {%- if col.handle contains 'drop-' -%}
-    {%- assign drop_collection = col -%}
-    {%- break -%}
+{%- comment -%} ── Gather all drop collections with hero photos ── {%- endcomment -%}
+{%- assign drop_handles = '' -%}
+{%- assign drop_count = 0 -%}
+{%- for col in collections -%}
+  {%- assign h = col.handle -%}
+  {%- if h contains 'drop-' -%}
+    {%- assign hero = col.metafields.custom.hero_photo_url.value -%}
+    {%- if hero != blank -%}
+      {%- if drop_count > 0 -%}
+        {%- assign drop_handles = drop_handles | append: '|||' -%}
+      {%- endif -%}
+      {%- assign drop_handles = drop_handles | append: h -%}
+      {%- assign drop_count = drop_count | plus: 1 -%}
+    {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
-
-{%- if drop_collection -%}
-  {%- assign hero_url = drop_collection.metafields.custom.hero_photo_url.value -%}
-  {%- assign hotspots_data = drop_collection.metafields.custom.hotspots.value -%}
-{%- endif -%}
 
 <style>
   /* ── "You May Also Like" heading ── */
@@ -34,6 +35,43 @@
     margin: 0;
     padding: 32px 24px 16px;
     text-align: left;
+    position: relative;
+  }
+
+  /* ── RANDOM > button ── */
+  .phs-random-btn {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #000;
+    text-decoration: none;
+    line-height: 1;
+    transition: color 0.12s;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .phs-random-btn:hover {
+    color: #d4021d;
+  }
+  .phs-random-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+  .phs-random-btn:hover svg {
+    transform: translateX(3px);
   }
 
   /* ── Full-bleed hero wrapper ── */
@@ -41,8 +79,9 @@
     position: relative;
     width: 100%;
     overflow: hidden;
-    background: #111;
+    background: #f5f5f5;
     display: block;
+    margin-bottom: 2px;
   }
 
   /* Image fills width, natural aspect ratio */
@@ -144,55 +183,131 @@
     .phs-heading {
       padding: 24px 16px 12px;
     }
+    .phs-random-btn {
+      right: 16px;
+    }
     .phs-hotspot-zone { width: 64px; height: 64px; }
     .phs-hotspot-zone::before { width: 18px; height: 18px; }
   }
 </style>
 
-{%- if hero_url != blank -%}
+{%- if drop_count > 0 -%}
   <section class="phs-section">
-    <h2 class="phs-heading">You may also like</h2>
+    <h2 class="phs-heading">
+      You may also like
+      <a class="phs-random-btn" id="phs-random-btn" href="/" aria-label="Go to a random drop">
+        <span>random</span>
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </h2>
 
-    <div class="phs-photo-wrapper" id="phs-wrapper">
-      <img class="phs-hero" src="{{ hero_url }}" alt="{{ drop_collection.title | escape }}" loading="lazy">
+    {%- comment -%} Render all drop hero photos — JS will shuffle them {%- endcomment -%}
+    <div id="phs-all-drops">
+      {%- assign drop_arr = drop_handles | split: '|||' -%}
+      {%- for handle in drop_arr -%}
+        {%- assign dcol = collections[handle] -%}
+        {%- assign hero_url = dcol.metafields.custom.hero_photo_url.value -%}
+        {%- assign hotspots_data = dcol.metafields.custom.hotspots.value -%}
 
-      {%- if hotspots_data != blank -%}
-        <script id="phs-hotspots-data" type="application/json">{{ hotspots_data | json }}</script>
-      {%- endif -%}
+        <div class="phs-drop-block" data-drop-handle="{{ handle }}" style="display:none;">
+          <div class="phs-photo-wrapper">
+            <img class="phs-hero" src="{{ hero_url }}" alt="{{ dcol.title | escape }}" loading="lazy">
+            {%- if hotspots_data != blank -%}
+              <script class="phs-hotspots-json" type="application/json">{{ hotspots_data | json }}</script>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
     </div>
   </section>
 
   <script>
-  /* Product page hotspots */
   (function() {
-    var wrapper = document.getElementById('phs-wrapper');
-    var dataEl  = document.getElementById('phs-hotspots-data');
-    if (!wrapper || !dataEl) return;
-
-    var hotspots;
-    try { hotspots = JSON.parse(dataEl.textContent.trim()); }
-    catch(e) { console.warn('Overflow: hotspot parse error', e); return; }
-    if (!Array.isArray(hotspots) || hotspots.length === 0) return;
+    /* ── Collect all drop blocks ── */
+    var container = document.getElementById('phs-all-drops');
+    if (!container) return;
+    var blocks = Array.prototype.slice.call(container.querySelectorAll('.phs-drop-block'));
+    if (blocks.length === 0) return;
 
     var currentHandle = {{ product.handle | json }};
+    var currentProductDrop = null;
 
-    hotspots.forEach(function(hs) {
-      var zone = document.createElement('a');
-      zone.className = 'phs-hotspot-zone';
-      if (hs.handle === currentHandle) {
-        zone.className += ' phs-hotspot-zone--current';
-      }
-      zone.href       = '/products/' + hs.handle;
-      zone.style.left = hs.left + '%';
-      zone.style.top  = hs.top  + '%';
-      zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
-
-      var label = document.createElement('span');
-      label.className = 'phs-hotspot-label';
-      label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
-      zone.appendChild(label);
-      wrapper.appendChild(zone);
+    /* ── Gather drop handles for RANDOM button ── */
+    var dropHandles = [];
+    blocks.forEach(function(b) {
+      dropHandles.push(b.getAttribute('data-drop-handle'));
     });
+
+    /* ── Find which drop contains the current product ── */
+    {%- for col in product.collections -%}
+      {%- if col.handle contains 'drop-' -%}
+        currentProductDrop = {{ col.handle | json }};
+      {%- endif -%}
+    {%- endfor -%}
+
+    /* ── Shuffle the blocks array (Fisher-Yates) ── */
+    for (var i = blocks.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = blocks[i];
+      blocks[i] = blocks[j];
+      blocks[j] = temp;
+    }
+
+    /* ── Move current product's drop to the front of the array ── */
+    if (currentProductDrop) {
+      for (var k = 0; k < blocks.length; k++) {
+        if (blocks[k].getAttribute('data-drop-handle') === currentProductDrop) {
+          var item = blocks.splice(k, 1)[0];
+          blocks.unshift(item);
+          break;
+        }
+      }
+    }
+
+    /* ── Re-append in shuffled order and show ── */
+    blocks.forEach(function(block) {
+      container.appendChild(block);
+      block.style.display = '';
+
+      var wrapper = block.querySelector('.phs-photo-wrapper');
+      var dataEl  = block.querySelector('.phs-hotspots-json');
+      if (!wrapper || !dataEl) return;
+
+      var hotspots;
+      try { hotspots = JSON.parse(dataEl.textContent.trim()); }
+      catch(e) { return; }
+      if (!Array.isArray(hotspots) || hotspots.length === 0) return;
+
+      hotspots.forEach(function(hs) {
+        var zone = document.createElement('a');
+        zone.className = 'phs-hotspot-zone';
+        if (hs.handle === currentHandle) {
+          zone.className += ' phs-hotspot-zone--current';
+        }
+        zone.href       = '/products/' + hs.handle;
+        zone.style.left = hs.left + '%';
+        zone.style.top  = hs.top  + '%';
+        zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
+
+        var label = document.createElement('span');
+        label.className = 'phs-hotspot-label';
+        label.innerHTML = hs.title + '<span>' + hs.price + '</span>';
+        zone.appendChild(label);
+        wrapper.appendChild(zone);
+      });
+    });
+
+    /* ── RANDOM button — go to a random drop collection ── */
+    var randomBtn = document.getElementById('phs-random-btn');
+    if (randomBtn && dropHandles.length > 0) {
+      randomBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var idx = Math.floor(Math.random() * dropHandles.length);
+        window.location.href = '/collections/' + dropHandles[idx];
+      });
+    }
   })();
   </script>
 {%- endif -%}
