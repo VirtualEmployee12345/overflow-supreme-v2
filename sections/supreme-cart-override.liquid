@@ -353,6 +353,16 @@
 (function() {
   'use strict';
 
+  /* ── DOM cleanup on load ── */
+  // Strip "USD" from all price-item elements (it's plain text, not a separate element)
+  document.querySelectorAll('.price-item').forEach(function(el) {
+    el.childNodes.forEach(function(node) {
+      if (node.nodeType === 3) { // text node
+        node.textContent = node.textContent.replace(/\s*USD\s*/g, '');
+      }
+    });
+  });
+
   /* ── Helpers ── */
   function formatMoney(cents) {
     return '$' + (cents / 100).toFixed(0);
