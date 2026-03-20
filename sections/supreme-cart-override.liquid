@@ -215,6 +215,9 @@
       width: 100% !important;
       margin-top: 0 !important;
     }
+    .sco-free-shipping {
+      grid-column: 1 / -1 !important;
+    }
   }
 
   /* ══════════════════════════════════════════════
@@ -345,6 +348,24 @@
   .section-main-product .page-width {
     padding-top: 0 !important;
   }
+
+  /* ── Free shipping notice ── */
+  .sco-free-shipping {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    font-weight: 400;
+    color: #d4021d;
+    margin-top: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+  }
+  @media (max-width: 749px) {
+    .sco-free-shipping {
+      grid-column: 1 / -1 !important;
+      text-align: center;
+      margin-top: 8px;
+    }
+  }
 </style>
 
 <!-- Mini Cart Popup HTML -->
@@ -430,6 +451,12 @@
   keepBtn.className = 'sco-keep-shopping';
   keepBtn.textContent = 'keep shopping';
   formButtons.appendChild(keepBtn);
+
+  /* ── Create Free Shipping notice ── */
+  var shippingNotice = document.createElement('div');
+  shippingNotice.className = 'sco-free-shipping';
+  shippingNotice.textContent = '* free shipping on all orders over $250, some exceptions may apply';
+  formButtons.appendChild(shippingNotice);
 
   /* ── Update mini cart display ── */
   function updateMiniCart(cart) {
@@ -564,3 +591,4 @@
   "presets": [{"name": "Supreme Cart Override"}]
 }
 {% endschema %}
+
