@@ -176,6 +176,43 @@
     font-size: 12px;
     color: #000;
   }
+
+  /* ── Random > button in grid header ── */
+  .supreme-grid-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 0 4px;
+  }
+  .supreme-random-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: #000;
+    text-decoration: none;
+    line-height: 1;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.12s;
+  }
+  .supreme-random-btn:hover {
+    color: #d4021d;
+  }
+  .supreme-random-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+  .supreme-random-btn:hover svg {
+    transform: translateX(3px);
+  }
 {%- endstyle -%}
 
 {%- paginate collection.products by section.settings.products_per_page -%}
@@ -216,6 +253,41 @@
   {%- comment -%} ── Product Grid ── {%- endcomment -%}
   <div class="supreme-grid-area">
     <div class="loading-overlay gradient"></div>
+
+    {%- comment -%} Random > button — collect drop handles {%- endcomment -%}
+    {%- assign drop_list = '' -%}
+    {%- assign dc = 0 -%}
+    {%- for col in collections -%}
+      {%- if col.handle contains 'drop-' -%}
+        {%- assign hurl = col.metafields.custom.hero_photo_url.value -%}
+        {%- if hurl != blank -%}
+          {%- if dc > 0 -%}{%- assign drop_list = drop_list | append: ',' -%}{%- endif -%}
+          {%- assign drop_list = drop_list | append: col.handle -%}
+          {%- assign dc = dc | plus: 1 -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if dc > 0 -%}
+      <div class="supreme-grid-header">
+        <button class="supreme-random-btn" id="supreme-random-btn" aria-label="Go to a random drop">
+          <span>random</span>
+          <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <script>
+      (function() {
+        var btn = document.getElementById('supreme-random-btn');
+        if (!btn) return;
+        var handles = {{ drop_list | split: ',' | json }};
+        btn.addEventListener('click', function() {
+          var idx = Math.floor(Math.random() * handles.length);
+          window.location.href = '/collections/' + handles[idx];
+        });
+      })();
+      </script>
+    {%- endif -%}
 
     {%- if collection.products.size == 0 -%}
       <div class="supreme-empty">

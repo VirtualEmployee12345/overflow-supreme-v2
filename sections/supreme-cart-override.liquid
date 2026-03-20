@@ -538,8 +538,7 @@
     });
   });
 
-  /* ── Dismiss mini cart on scroll or click outside ── */
-  var miniCartTimeout;
+  /* ── Dismiss mini cart on click outside ── */
   document.addEventListener('click', function(e) {
     if (miniCart && miniCart.classList.contains('sco-visible')) {
       if (!miniCart.contains(e.target) && !formButtons.contains(e.target)) {
@@ -548,16 +547,7 @@
     }
   });
 
-  /* Auto-dismiss after 5 seconds */
-  var observer = new MutationObserver(function() {
-    if (miniCart.classList.contains('sco-visible')) {
-      clearTimeout(miniCartTimeout);
-      miniCartTimeout = setTimeout(function() {
-        hideMiniCart();
-      }, 5000);
-    }
-  });
-  observer.observe(miniCart, { attributes: true, attributeFilter: ['class'] });
+  /* Mini cart stays open until user clicks outside or navigates away */
 
   /* ── Init: check if variant is already in cart ── */
   checkCartForVariant();

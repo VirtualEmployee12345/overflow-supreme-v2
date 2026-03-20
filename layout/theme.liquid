@@ -339,6 +339,197 @@
       {%- render 'cart-drawer' -%}
     {%- endif -%}
 
+    <!-- ═══ Supreme-style sticky mobile header ═══ -->
+    <style id="overflow-mobile-header-css">
+      .ofm-header {
+        display: none;
+      }
+      @media (max-width: 749px) {
+        .ofm-header {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 48px;
+          background: #f2f2f2;
+          z-index: 9999;
+          padding: 0 12px;
+          gap: 8px;
+        }
+        /* Push body content below the fixed header */
+        body { padding-top: 48px !important; }
+        /* Hide Dawn's default header on mobile */
+        .shopify-section-group-header-group { display: none !important; }
+        /* Hide the back-bar on mobile (header replaces it) */
+        .section-back-bar { display: none !important; }
+
+        .ofm-back {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          flex-shrink: 0;
+          color: #000;
+          text-decoration: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .ofm-back svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .ofm-logo {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+        }
+        .ofm-logo a {
+          display: block;
+          line-height: 0;
+        }
+        .ofm-logo svg {
+          height: 18px;
+          width: auto;
+        }
+
+        .ofm-cart-area {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .ofm-cart-count {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          min-width: 28px;
+          height: 28px;
+          border: 1.5px solid #999;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 11px;
+          font-weight: 700;
+          color: #000;
+          text-decoration: none;
+          padding: 0 6px;
+        }
+        .ofm-cart-count.ofm-has-items {
+          display: flex;
+        }
+
+        .ofm-checkout {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          height: 28px;
+          padding: 0 12px;
+          background: #d4021d;
+          color: #fff;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: lowercase;
+          text-decoration: none;
+          letter-spacing: 0.02em;
+          border: none;
+        }
+        .ofm-checkout.ofm-has-items {
+          display: flex;
+        }
+      }
+    </style>
+
+    <header class="ofm-header" id="ofm-header">
+      <a class="ofm-back" id="ofm-back" href="/" aria-label="Go back">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 4L7 10L13 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <div class="ofm-logo">
+        <a href="/" aria-label="Overflow home">
+          <svg viewBox="0 0 288 87" xmlns="http://www.w3.org/2000/svg">
+            <rect width="288" height="87" rx="4" fill="#d4021d"/>
+            <text x="144" y="62" text-anchor="middle" font-family="'Futura', 'Arial Black', sans-serif" font-size="50" font-weight="900" font-style="italic" fill="#fff" letter-spacing="2">overflow</text>
+          </svg>
+        </a>
+      </div>
+      <div class="ofm-cart-area">
+        <a class="ofm-cart-count" id="ofm-cart-count" href="/cart" aria-label="Cart">0</a>
+        <a class="ofm-checkout" id="ofm-checkout" href="/checkout">checkout</a>
+      </div>
+    </header>
+
+    <script id="ofm-header-script">
+    (function() {
+      if (window.innerWidth > 749) return;
+
+      var countEl = document.getElementById('ofm-cart-count');
+      var checkoutEl = document.getElementById('ofm-checkout');
+      var backEl = document.getElementById('ofm-back');
+
+      /* Update cart count badge */
+      function updateCartBadge() {
+        fetch('/cart.js', { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(cart) {
+            var n = cart.item_count;
+            if (n > 0) {
+              countEl.textContent = n;
+              countEl.classList.add('ofm-has-items');
+              checkoutEl.classList.add('ofm-has-items');
+            } else {
+              countEl.classList.remove('ofm-has-items');
+              checkoutEl.classList.remove('ofm-has-items');
+            }
+          });
+      }
+
+      /* Back button: use referrer or history */
+      if (backEl) {
+        backEl.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (document.referrer && new URL(document.referrer).hostname === window.location.hostname) {
+            window.location.href = document.referrer;
+          } else if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            window.location.href = '/';
+          }
+        });
+      }
+
+      /* Poll cart on initial load */
+      updateCartBadge();
+
+      /* Listen for cart changes from the product page add-to-cart JS */
+      document.addEventListener('cart:updated', updateCartBadge);
+
+      /* Also re-check when visibility changes (e.g. navigating back) */
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) updateCartBadge();
+      });
+
+      /* Intercept fetch to /cart/add.js and /cart/change.js to update badge */
+      var origFetch = window.fetch;
+      window.fetch = function() {
+        var args = arguments;
+        var url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+        var result = origFetch.apply(this, args);
+        if (url.includes('/cart/add') || url.includes('/cart/change') || url.includes('/cart/update') || url.includes('/cart/clear')) {
+          result.then(function() {
+            setTimeout(updateCartBadge, 200);
+          });
+        }
+        return result;
+      };
+    })();
+    </script>
+    <!-- ═══ End mobile header ═══ -->
+
     {% sections 'header-group' %}
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
