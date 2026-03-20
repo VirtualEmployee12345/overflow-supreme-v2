@@ -40,7 +40,6 @@
             "picker_type": "button"
           }
         },
-
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
@@ -66,7 +65,7 @@
           "settings": {
             "heading": "Shipping & Returns",
             "icon": "truck",
-            "content": "<p>Your product will be shipped ASAP.<\/p><p>No Returns.<\/p>",
+            "content": "<p>Your product will be shipped ASAP.</p><p>No Returns.</p>",
             "page": ""
           }
         },
@@ -122,21 +121,9 @@
         "padding_bottom": 12
       }
     },
-    "related-products": {
-      "type": "related-products",
-      "settings": {
-        "heading": "You may also like",
-        "heading_size": "h2",
-        "columns_desktop": 4,
-        "columns_mobile": "2",
-        "color_scheme": "scheme-1",
-        "image_ratio": "square",
-        "show_secondary_image": true,
-        "show_vendor": false,
-        "show_rating": false,
-        "padding_top": 36,
-        "padding_bottom": 28
-      }
+    "product-hotspot-hero": {
+      "type": "product-hotspot-hero",
+      "settings": {}
     },
     "back_bar": {
       "type": "back-to-drop",
@@ -146,7 +133,6 @@
   "order": [
     "back_bar",
     "main",
-    "related-products"
+    "product-hotspot-hero"
   ]
 }
-
