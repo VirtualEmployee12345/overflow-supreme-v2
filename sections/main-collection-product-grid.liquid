@@ -102,7 +102,7 @@
 
   .product-grid--supreme .grid__item {
     display: block;
-    background: #fff;
+    background: #fff !important;
   }
 
   /* ── Product Card: image only, no text ── */
@@ -172,10 +172,11 @@
     .supreme-product-card__sold-out-overlay { display: none; }
   }
 
-  /* ── Product Info (title + price / sold out) ── */
+  /* ── Product Info (title + sold out) ── */
   .supreme-product-card__info {
     margin-top: 8px;
     padding: 0;
+    background: #fff;
   }
 
   .supreme-product-card__title {
@@ -186,16 +187,6 @@
     line-height: 1.4;
     display: block;
     text-decoration: none;
-  }
-
-  .supreme-product-card__price {
-    font-family: "Courier New", Courier, monospace;
-    font-size: 11px;
-    font-weight: 400;
-    color: #000;
-    line-height: 1.4;
-    display: block;
-    margin-top: 2px;
   }
 
   .supreme-product-card__sold-out-label {
@@ -452,6 +443,12 @@
                 {%- endunless -%}
               </div>
             </a>
+            <div class="supreme-product-card__info">
+              <span class="supreme-product-card__title">{{ product.title | escape }}</span>
+              {%- unless product.available -%}
+                <span class="supreme-product-card__sold-out-label">sold out</span>
+              {%- endunless -%}
+            </div>
           </li>
         {%- endfor -%}
         {%- comment -%} Fill remaining cells in last row with white fillers {%- endcomment -%}
@@ -468,7 +465,6 @@
         {% render 'pagination', paginate: paginate, anchor: '' %}
       {%- endif -%}
     {%- endif -%}
-    <script src="{{ 'supreme-product-info.js' | asset_url }}" defer></script>
   </div>
 </div>
 
