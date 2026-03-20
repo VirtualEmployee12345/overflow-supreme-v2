@@ -1,7 +1,4 @@
 {{ 'template-collection.css' | asset_url | stylesheet_tag }}
-{{ 'component-card.css' | asset_url | stylesheet_tag }}
-{{ 'component-price.css' | asset_url | stylesheet_tag }}
-{{ 'supreme-overrides.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   /* Supreme-style two-column layout: sidebar + grid */
@@ -9,7 +6,7 @@
     display: grid;
     grid-template-columns: 130px 1fr;
     min-height: 60vh;
-    background: #fff;
+    background: #000;
   }
 
   @media screen and (max-width: 749px) {
@@ -22,7 +19,7 @@
   /* ── Sidebar ── */
   .supreme-sidebar {
     padding: 18px 0 18px 20px;
-    background: #fff;
+    background: #000;
   }
 
   .supreme-sidebar__nav {
@@ -36,7 +33,7 @@
     font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
     font-size: 11px;
     font-weight: 400;
-    color: #000;
+    color: #fff;
     text-decoration: none;
     text-align: right;
     display: block;
@@ -51,23 +48,20 @@
 
   /* ── Product Grid ── */
   .supreme-grid-area {
-    background: #fff;
+    background: #000;
     padding: 0;
   }
 
   .product-grid--supreme {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
     padding: 0;
     margin: 0;
     list-style: none;
-    background: #fff;
+    background: #000;
   }
 
-  @media screen and (max-width: 1200px) {
-    .product-grid--supreme { grid-template-columns: repeat(4, 1fr); }
-  }
   @media screen and (max-width: 900px) {
     .product-grid--supreme { grid-template-columns: repeat(3, 1fr); }
   }
@@ -77,21 +71,22 @@
 
   .product-grid--supreme .grid__item {
     display: block;
-    background: #fff;
+    background: #000;
   }
 
-  /* ── Supreme Product Card ── */
+  /* ── Full-Bleed Product Card with Hover Overlay ── */
   .supreme-product-card {
     display: block;
-    background: #fff;
+    background: #000;
     border: none;
     padding: 0;
     cursor: pointer;
+    position: relative;
   }
 
   .supreme-product-card__image-wrap {
     display: block;
-    background: #fff;
+    background: #111;
     overflow: hidden;
     aspect-ratio: 1 / 1;
     position: relative;
@@ -100,54 +95,76 @@
   .supreme-product-card__image-wrap img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     display: block;
-    background: #fff;
-    transition: none;
+    transition: transform 0.3s ease;
   }
 
-  .supreme-product-card__info {
-    padding: 4px 4px 10px 4px;
+  .supreme-product-card:hover .supreme-product-card__image-wrap img {
+    transform: scale(1.03);
+  }
+
+  /* Hover overlay: gradient + text */
+  .supreme-product-card__overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px 10px 10px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .supreme-product-card:hover .supreme-product-card__overlay {
+    opacity: 1;
+  }
+
+  /* On touch devices, always show overlay */
+  @media (hover: none) {
+    .supreme-product-card__overlay {
+      opacity: 1;
+    }
   }
 
   .supreme-product-card__title {
     font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
-    color: #000;
+    color: #fff;
     margin: 0 0 2px 0;
     line-height: 1.3;
     text-decoration: none;
     display: block;
   }
 
-  .supreme-product-card__title:hover {
-    text-decoration: underline;
-  }
-
   .supreme-product-card__price {
     font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
-    color: #000;
+    color: #fff;
     margin: 0;
     display: block;
   }
 
   .supreme-product-card__sold-out {
-    font-size: 11px;
-    color: #888;
+    font-size: 12px;
+    color: #999;
   }
 
   /* ── Loading ── */
-  .loading-overlay { background: #fff !important; }
+  .loading-overlay { background: #000 !important; }
 
   /* ── Empty state ── */
   .supreme-empty {
     padding: 40px 20px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
-    color: #000;
+    color: #fff;
   }
 {%- endstyle -%}
 
@@ -211,22 +228,21 @@
       >
         {%- for product in collection.products -%}
           {%- assign lazy_load = true -%}
-          {%- if forloop.index <= 5 -%}{%- assign lazy_load = false -%}{%- endif -%}
+          {%- if forloop.index <= 8 -%}{%- assign lazy_load = false -%}{%- endif -%}
           <li class="grid__item">
-            {%- comment -%} Supreme-style minimal product card {%- endcomment -%}
-            <article class="supreme-product-card">
-              <a href="{{ product.url }}" class="supreme-product-card__image-wrap" aria-label="{{ product.title | escape }}">
+            <a href="{{ product.url }}" class="supreme-product-card" aria-label="{{ product.title | escape }}">
+              <div class="supreme-product-card__image-wrap">
                 {%- if product.featured_media -%}
                   <img
                     srcset="
-                      {%- if product.featured_media.width >= 165 -%}{{ product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
                       {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
                       {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
                       {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                      {%- if product.featured_media.width >= 940 -%}{{ product.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
                       {{ product.featured_media | image_url }} {{ product.featured_media.width }}w
                     "
-                    src="{{ product.featured_media | image_url: width: 360 }}"
-                    sizes="(min-width: 1200px) 20vw, (min-width: 990px) 25vw, (min-width: 600px) 33vw, 50vw"
+                    src="{{ product.featured_media | image_url: width: 720 }}"
+                    sizes="(min-width: 900px) 25vw, (min-width: 600px) 33vw, 50vw"
                     alt="{{ product.featured_media.alt | escape | default: product.title | escape }}"
                     {% unless lazy_load == false %}loading="lazy"{% endunless %}
                     width="{{ product.featured_media.width }}"
@@ -235,18 +251,18 @@
                 {%- else -%}
                   {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
                 {%- endif -%}
-              </a>
-              <div class="supreme-product-card__info">
-                <a href="{{ product.url }}" class="supreme-product-card__title">{{ product.title }}</a>
-                <span class="supreme-product-card__price">
-                  {%- if product.available -%}
-                    {{ product.price | money }}
-                  {%- else -%}
-                    <span class="supreme-product-card__sold-out">Sold Out</span>
-                  {%- endif -%}
-                </span>
+                <div class="supreme-product-card__overlay">
+                  <span class="supreme-product-card__title">{{ product.title }}</span>
+                  <span class="supreme-product-card__price">
+                    {%- if product.available -%}
+                      {{ product.price | money }}
+                    {%- else -%}
+                      <span class="supreme-product-card__sold-out">Sold Out</span>
+                    {%- endif -%}
+                  </span>
+                </div>
               </div>
-            </article>
+            </a>
           </li>
         {%- endfor -%}
       </ul>
@@ -303,4 +319,3 @@
   ]
 }
 {% endschema %}
-
