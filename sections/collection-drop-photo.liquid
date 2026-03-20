@@ -279,7 +279,17 @@
   }
 
   @media (max-width: 600px) {
-    .cdp-photo-wrapper { height: 100svh; }
+    .cdp-photo-wrapper {
+      height: auto;
+      overflow: visible;
+    }
+    .cdp-hero {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
     .cdp-hotspot-zone { width: 64px; height: 64px; }
     .cdp-hotspot-zone::before { width: 18px; height: 18px; }
     .cdp-product-grid { grid-template-columns: repeat(2, 1fr); }
@@ -459,3 +469,4 @@
   "presets": [{"name": "Drop — Shop the Photo"}]
 }
 {% endschema %}
+
