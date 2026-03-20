@@ -200,7 +200,7 @@ details[open] > .facets__display,
   text-decoration: underline;
 }
 
-/* ── Product Grid ─────────────────────────────────────────── */
+/* ── Product Grid — Full-Bleed with Hover Overlay ────────── */
 .product-grid-container,
 .product-grid-container--supreme {
   flex: 1 !important;
@@ -212,17 +212,23 @@ details[open] > .facets__display,
 .product-grid--supreme,
 .product-grid {
   display: grid !important;
-  grid-template-columns: repeat(5, 1fr) !important;
-  gap: 0 !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 2px !important;
   padding: 0 !important;
   margin: 0 !important;
   list-style: none !important;
-  background: var(--supreme-white) !important;
+  background: #000 !important;
 }
 
-@media screen and (max-width: 1200px) {
-  .product-grid--supreme,
-  .product-grid { grid-template-columns: repeat(4, 1fr) !important; }
+/* Override Dawn base.css grid__item max-width constraint */
+.product-grid--supreme .grid__item,
+.product-grid .grid__item {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex: none !important;
+  background: #000 !important;
 }
 
 @media screen and (max-width: 990px) {
@@ -242,10 +248,10 @@ details[open] > .facets__display,
   .product-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
-/* ── Product Cards ────────────────────────────────────────── */
+/* ── Product Cards — Full-Bleed Image + Hover Overlay ────── */
 .product-card-wrapper--supreme,
 .card-wrapper {
-  background: var(--supreme-white) !important;
+  background: #000 !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -255,16 +261,16 @@ details[open] > .facets__display,
 
 .card--supreme,
 .card {
-  background: var(--supreme-white) !important;
+  background: #000 !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
 }
 
-/* Product image container — no background, square crop */
+/* Product image container — square crop, full-bleed */
 .card__inner--supreme,
 .card__inner {
-  background: var(--supreme-white) !important;
+  background: #111 !important;
   border: none !important;
   border-radius: 0 !important;
   padding: 0 !important;
@@ -273,34 +279,84 @@ details[open] > .facets__display,
 
 .card__media--supreme,
 .card__media {
-  background: var(--supreme-white) !important;
+  background: #111 !important;
   border-radius: 0 !important;
+  position: relative !important;
 }
 
-/* Supreme product images — white bg, contain within cell */
+/* Product images — fill the cell, crop to square */
 .supreme-card__image,
 .card__media img,
 .card__media .media img {
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   display: block !important;
-  object-fit: contain !important;
-  background: var(--supreme-white) !important;
+  object-fit: cover !important;
+  background: #111 !important;
+  transition: transform 0.3s ease !important;
+}
+
+.card-wrapper:hover .card__media img,
+.card-wrapper:hover .card__media .media img {
+  transform: scale(1.03) !important;
 }
 
 .media--hover-effect img:first-child {
-  transition: none !important;
+  transition: transform 0.3s ease !important;
 }
 
-/* Product title — below image, small left-aligned text */
+/* Make .media wrapper fill its parent */
+.card__media .media {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.card__media .media--square,
+.card__media .media--portrait,
+.card__media .media--landscape,
+.card__media .media--adapt {
+  padding-bottom: 100% !important;
+}
+
+/* Product info — overlay on hover, gradient from bottom */
+.card__content,
+.card-information {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 40px 10px 10px 10px !important;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%) !important;
+  opacity: 0 !important;
+  transition: opacity 0.25s ease !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+  margin: 0 !important;
+}
+
+.card-wrapper:hover .card__content,
+.card-wrapper:hover .card-information {
+  opacity: 1 !important;
+}
+
+/* On touch devices, always show overlay */
+@media (hover: none) {
+  .card__content,
+  .card-information {
+    opacity: 1 !important;
+  }
+}
+
+/* Product title — white text over image */
 .supreme-card__title,
 .card__content .card__heading,
 .card__heading {
   font-family: var(--supreme-font) !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 400 !important;
-  color: var(--supreme-black) !important;
-  margin: 4px 4px 0 4px !important;
+  color: #fff !important;
+  margin: 0 0 2px 0 !important;
   padding: 0 !important;
   line-height: 1.3 !important;
   text-transform: none !important;
@@ -308,22 +364,25 @@ details[open] > .facets__display,
 }
 
 .card__heading a {
-  color: var(--supreme-black) !important;
+  color: #fff !important;
   text-decoration: none !important;
 }
-.card__heading a:hover { text-decoration: underline !important; }
+.card__heading a:hover { text-decoration: none !important; }
 
-/* Price */
-.price,
-.price__regular,
-.price__sale,
-.price-item,
-.card__content .price {
+/* Price — white text in collection card overlays only */
+.card__content .price,
+.card-information .price,
+.card__content .price__regular,
+.card__content .price__sale,
+.card__content .price-item,
+.card-information .price__regular,
+.card-information .price__sale,
+.card-information .price-item {
   font-family: var(--supreme-font) !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 400 !important;
-  color: var(--supreme-black) !important;
-  margin: 2px 4px 6px 4px !important;
+  color: #fff !important;
+  margin: 0 !important;
   padding: 0 !important;
 }
 
@@ -463,7 +522,17 @@ footer a:hover { text-decoration: underline !important; }
 
 /* ── Loading overlay ──────────────────────────────────────── */
 .loading-overlay {
-  background: var(--supreme-white) !important;
+  background: #000 !important;
+}
+
+/* Make card wrapper position relative for overlay */
+.card-wrapper {
+  position: relative !important;
+  overflow: hidden !important;
+}
+.card__inner {
+  position: relative !important;
+  height: 100% !important;
 }
 
 /* ── Pagination ───────────────────────────────────────────── */
@@ -472,16 +541,8 @@ footer a:hover { text-decoration: underline !important; }
 }
 
 /* ── Remove all borders, cards, gradients ────────────────── */
-.gradient {
-  background: var(--supreme-white) !important;
-}
-
-.color-background-1,
-.color-background-2,
-.color-inverse {
-  background: var(--supreme-white) !important;
-  color: var(--supreme-black) !important;
-}
+/* .gradient and color-background overrides removed
+   to allow dark product grid backgrounds */
 
 /* ── Scrollbar ────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -763,4 +824,5 @@ button[name="checkout"]:hover {
   color: #fff !important;
   border-radius: 0 !important;
 }
+
 
