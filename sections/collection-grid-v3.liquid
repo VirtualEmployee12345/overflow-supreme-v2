@@ -1,0 +1,297 @@
+<!-- SUPREME_V3_1774011223 -->
+{{ 'template-collection.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  /* ═══════════════════════════════════════════════════
+     Supreme-style collection grid
+     – White background, image-only cards
+     – Hover: thin border (available) or "sold out" overlay
+     ═══════════════════════════════════════════════════ */
+
+  /* Two-column layout: sidebar + grid */
+  .supreme-collection-layout {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    min-height: 60vh;
+    background: #fff;
+  }
+
+  @media screen and (max-width: 749px) {
+    .supreme-collection-layout {
+      grid-template-columns: 1fr;
+    }
+    .supreme-sidebar { display: none; }
+  }
+
+  /* ── Sidebar ── */
+  .supreme-sidebar {
+    padding: 18px 0 18px 10px;
+    background: #fff;
+  }
+
+  .supreme-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+  }
+
+  .supreme-sidebar__link {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+    text-align: right;
+    display: block;
+    padding: 1px 14px 1px 0;
+    line-height: 1.8;
+    text-transform: lowercase;
+  }
+
+  .supreme-sidebar__link:hover,
+  .supreme-sidebar__link--active {
+    text-decoration: underline;
+  }
+
+  /* ── Product Grid ── */
+  .supreme-grid-area {
+    background: #fff;
+    padding: 10px 20px 40px 0;
+  }
+
+  .product-grid--supreme {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    background: #fff;
+  }
+
+  @media screen and (max-width: 900px) {
+    .product-grid--supreme { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media screen and (max-width: 600px) {
+    .product-grid--supreme { grid-template-columns: repeat(2, 1fr); }
+    .supreme-grid-area { padding: 8px 8px 30px 8px; }
+  }
+
+  .product-grid--supreme .grid__item {
+    display: block;
+    background: #fff;
+  }
+
+  /* ── Product Card: image only, no text ── */
+  .supreme-product-card {
+    display: block;
+    background: #fff;
+    border: 1px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .supreme-product-card:hover {
+    border-color: #e0e0e0;
+  }
+
+  .supreme-product-card__image-wrap {
+    display: block;
+    background: #fff;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    position: relative;
+  }
+
+  .supreme-product-card__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* ── Sold Out overlay: only visible on hover ── */
+  .supreme-product-card__sold-out-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+
+  .supreme-product-card:hover .supreme-product-card__sold-out-overlay {
+    opacity: 1;
+  }
+
+  .supreme-product-card__sold-out-text {
+    background: rgba(255, 255, 255, 0.92);
+    padding: 8px 14px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    text-align: center;
+    line-height: 1.4;
+    text-transform: lowercase;
+  }
+
+  /* ── Loading ── */
+  .loading-overlay { background: #fff !important; }
+
+  /* ── Empty state ── */
+  .supreme-empty {
+    padding: 40px 20px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    color: #000;
+  }
+{%- endstyle -%}
+
+{%- paginate collection.products by section.settings.products_per_page -%}
+
+<div class="supreme-collection-layout">
+  {%- comment -%} ── Left Sidebar Category Nav ── {%- endcomment -%}
+  <aside class="supreme-sidebar" aria-label="Categories">
+    <nav class="supreme-sidebar__nav">
+      {%- assign system_handles = 'new,all,frontpage,staff-picks,home-page' | split: ',' -%}
+
+      {%- comment -%} 1. NEW always first {%- endcomment -%}
+      <a href="/collections/new"
+        class="supreme-sidebar__link{% if collection.handle == 'new' %} supreme-sidebar__link--active{% endif %}"
+      >new</a>
+
+      {%- comment -%} 2. Dynamic descriptive collections {%- endcomment -%}
+      {%- for col in collections -%}
+        {%- assign h = col.handle -%}
+        {%- assign skip = false -%}
+        {%- if h contains 'drop-' -%}{%- assign skip = true -%}{%- endif -%}
+        {%- for sys in system_handles -%}
+          {%- if h == sys -%}{%- assign skip = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- unless skip -%}
+          <a href="{{ col.url }}"
+            class="supreme-sidebar__link{% if collection.handle == h %} supreme-sidebar__link--active{% endif %}"
+          >{{ col.title | downcase }}</a>
+        {%- endunless -%}
+      {%- endfor -%}
+
+      {%- comment -%} 3. ALL always last {%- endcomment -%}
+      <a href="/collections/all"
+        class="supreme-sidebar__link{% if collection.handle == 'all' %} supreme-sidebar__link--active{% endif %}"
+      >all</a>
+    </nav>
+  </aside>
+
+  {%- comment -%} ── Product Grid ── {%- endcomment -%}
+  <div class="supreme-grid-area">
+    <div class="loading-overlay gradient"></div>
+
+    {%- if collection.products.size == 0 -%}
+      <div class="supreme-empty">
+        {{ 'sections.collection_template.empty' | t }}<br>
+        <a href="{{ collection.url }}" class="underlined-link">{{ 'sections.collection_template.use_fewer_filters_html' | t: link: collection.url, class: 'underlined-link link' }}</a>
+      </div>
+    {%- else -%}
+      <ul
+        id="product-grid"
+        data-id="{{ section.id }}"
+        class="product-grid--supreme"
+      >
+        {%- for product in collection.products -%}
+          {%- assign lazy_load = true -%}
+          {%- if forloop.index <= 8 -%}{%- assign lazy_load = false -%}{%- endif -%}
+          <li class="grid__item">
+            <a href="{{ product.url }}" class="supreme-product-card" aria-label="{{ product.title | escape }}">
+              <div class="supreme-product-card__image-wrap">
+                {%- if product.featured_media -%}
+                  <img
+                    srcset="
+                      {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                      {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                      {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                      {{ product.featured_media | image_url }} {{ product.featured_media.width }}w
+                    "
+                    src="{{ product.featured_media | image_url: width: 533 }}"
+                    sizes="(min-width: 900px) 25vw, (min-width: 600px) 33vw, 50vw"
+                    alt="{{ product.featured_media.alt | escape | default: product.title | escape }}"
+                    {% unless lazy_load == false %}loading="lazy"{% endunless %}
+                    width="{{ product.featured_media.width }}"
+                    height="{{ product.featured_media.height }}"
+                  >
+                {%- else -%}
+                  {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+
+                {%- unless product.available -%}
+                  <div class="supreme-product-card__sold-out-overlay">
+                    <span class="supreme-product-card__sold-out-text">sold<br>out</span>
+                  </div>
+                {%- endunless -%}
+              </div>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if paginate.pages > 1 -%}
+        {% render 'pagination', paginate: paginate, anchor: '' %}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collection products",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 96,
+      "step": 4,
+      "default": 48,
+      "label": "Products per page"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section bottom padding",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

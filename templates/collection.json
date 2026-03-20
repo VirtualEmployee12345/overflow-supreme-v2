@@ -9,8 +9,8 @@
  */
 {
   "sections": {
-    "product-grid": {
-      "type": "main-collection-product-grid",
+    "grid-v3-1774011223": {
+      "type": "collection-grid-v3",
       "settings": {
         "products_per_page": 48,
         "padding_top": 0,
@@ -19,6 +19,6 @@
     }
   },
   "order": [
-    "product-grid"
+    "grid-v3-1774011223"
   ]
 }
