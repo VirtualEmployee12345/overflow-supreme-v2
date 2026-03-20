@@ -1,86 +1,25 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "color_schemes": {
       "scheme-1": {
         "settings": {
           "background": "#ffffff",
-          "background_gradient": "",
           "text": "#000000",
-          "shadow": "#000000",
           "button": "#000000",
           "button_label": "#ffffff",
-          "secondary_button_label": "#000000"
-        }
-      },
-      "scheme-2": {
-        "settings": {
-          "background": "#000000",
-          "background_gradient": "",
-          "text": "#ffffff",
-          "shadow": "#000000",
-          "button": "#ffffff",
-          "button_label": "#000000",
-          "secondary_button_label": "#ffffff"
+          "secondary_button_label": "#000000",
+          "shadow": "#000000"
         }
       }
-    },
-    "type_body_font": "helvetica_neue_n4",
-    "type_header_font": "helvetica_neue_n7",
-    "body_scale": 100,
-    "heading_scale": 100,
-    "media_padding": 0,
-    "media_border_opacity": 0,
-    "media_border_thickness": 0,
-    "media_radius": 0,
-    "media_shadow_opacity": 0,
-    "media_shadow_horizontal_offset": 0,
-    "media_shadow_vertical_offset": 0,
-    "media_shadow_blur": 0,
-    "page_width": 1440,
-    "spacing_sections": 0,
-    "spacing_grid_vertical": 0,
-    "spacing_grid_horizontal": 0,
-    "card_image_padding": 0,
-    "card_corner_radius": 0,
-    "card_text_alignment": "left",
-    "card_border_thickness": 0,
-    "card_border_opacity": 0,
-    "card_shadow_opacity": 0,
-    "card_shadow_horizontal_offset": 0,
-    "card_shadow_vertical_offset": 0,
-    "card_shadow_blur": 0,
-    "badge_corner_radius": 0,
-    "buttons_radius": 0,
-    "buttons_border_thickness": 0,
-    "buttons_border_opacity": 0,
-    "buttons_shadow_opacity": 0,
-    "buttons_shadow_horizontal_offset": 0,
-    "buttons_shadow_vertical_offset": 0,
-    "buttons_shadow_blur": 0,
-    "inputs_radius": 0,
-    "inputs_border_thickness": 1,
-    "inputs_border_opacity": 100,
-    "inputs_shadow_opacity": 0,
-    "inputs_shadow_horizontal_offset": 0,
-    "inputs_shadow_vertical_offset": 0,
-    "inputs_shadow_blur": 0,
-    "popup_border_thickness": 0,
-    "popup_border_opacity": 0,
-    "popup_corner_radius": 0,
-    "popup_shadow_opacity": 0,
-    "popup_shadow_horizontal_offset": 0,
-    "popup_shadow_vertical_offset": 0,
-    "popup_shadow_blur": 0,
-    "drawer_border_thickness": 0,
-    "drawer_border_opacity": 0,
-    "drawer_shadow_opacity": 0,
-    "drawer_shadow_horizontal_offset": 0,
-    "drawer_shadow_vertical_offset": 0,
-    "drawer_shadow_blur": 0,
-    "cart_type": "drawer",
-    "predictive_search_enabled": true,
-    "animations_reveal_on_scroll": false,
-    "animations_hover_elements": "none"
-  },
-  "presets": {}
+    }
+  }
 }
