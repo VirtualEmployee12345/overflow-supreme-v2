@@ -135,7 +135,7 @@
     display: block;
   }
 
-  /* ── Sold Out overlay: only visible on hover ── */
+  /* ── Sold Out overlay on image: desktop hover only ── */
   .supreme-product-card__sold-out-overlay {
     position: absolute;
     top: 0;
@@ -164,6 +164,68 @@
     text-align: center;
     line-height: 1.4;
     text-transform: lowercase;
+  }
+
+  /* Hide image overlay on mobile — text info shows below instead */
+  @media screen and (max-width: 749px) {
+    .supreme-product-card__sold-out-overlay { display: none; }
+  }
+
+  /* ── Product Info (title + price / sold out) ── */
+  .supreme-product-card__info {
+    margin-top: 8px;
+    padding: 0;
+  }
+
+  .supreme-product-card__title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 400;
+    color: #000;
+    line-height: 1.4;
+    display: block;
+    text-decoration: none;
+  }
+
+  .supreme-product-card__price {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 400;
+    color: #000;
+    line-height: 1.4;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .supreme-product-card__sold-out-label {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 400;
+    color: #666;
+    line-height: 1.4;
+    display: block;
+    margin-top: 2px;
+    text-transform: lowercase;
+  }
+
+  /* Desktop: hide info by default, show on hover */
+  @media screen and (min-width: 750px) {
+    .supreme-product-card__info {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .supreme-product-card:hover .supreme-product-card__info {
+      opacity: 1;
+    }
+  }
+
+  /* Mobile: always visible */
+  @media screen and (max-width: 749px) {
+    .supreme-product-card__info {
+      opacity: 1;
+      margin-top: 6px;
+      padding-bottom: 8px;
+    }
   }
 
   /* ── Loading ── */
@@ -387,6 +449,14 @@
                     <span class="supreme-product-card__sold-out-text">sold<br>out</span>
                   </div>
                 {%- endunless -%}
+              </div>
+              <div class="supreme-product-card__info">
+                <span class="supreme-product-card__title">{{ product.title }}</span>
+                {%- if product.available -%}
+                  <span class="supreme-product-card__price">{{ product.price | money }}</span>
+                {%- else -%}
+                  <span class="supreme-product-card__sold-out-label">sold out</span>
+                {%- endif -%}
               </div>
             </a>
           </li>
