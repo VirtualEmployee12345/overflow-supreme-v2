@@ -3600,8 +3600,9 @@ details-disclosure > details {
 }
 
 * { border-radius: 0 !important; box-shadow: none !important; }
-:root, [class*="color-"] { --color-background: 255,255,255 !important; --color-foreground: 0,0,0 !important; --gradient-background: #ffffff !important; }
-body, html { background: #FFFFFF !important; background-color: #FFFFFF !important; color: #000000 !important; font-family: Helvetica, Arial, sans-serif; text-transform: uppercase; }
+:root, :root [class*="color-"], :root .color-scheme-1 { --color-background: 255,255,255 !important; --color-foreground: 0,0,0 !important; --gradient-background: #ffffff !important; --color-background-contrast: 245,245,245 !important; }
+body, html { background: #FFFFFF !important; background-color: #FFFFFF !important; color: #000000 !important; font-family: Helvetica, Arial, sans-serif; }
+.supreme-sidebar__link { text-transform: lowercase !important; font-family: "Courier New", Courier, monospace !important; }
 .button, button, [role=button] { border: 1px solid #000000; background: transparent; color: #000000; text-transform: uppercase; }
 .button:hover, button:hover { background: #000000; color: #FFFFFF; }
 h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: 0.05em; }
