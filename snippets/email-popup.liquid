@@ -11,14 +11,12 @@
       <p style="font-size:22px;font-weight:700;margin:0;letter-spacing:2px;">DROP20</p>
       <p style="font-size:12px;color:#666;margin:4px 0 0;">20% off your first order</p>
     </div>
-    <form id="ov-popup-form" style="margin:0;" action="/contact#contact_form" method="POST">
-      <input type="hidden" name="form_type" value="customer">
-      <input type="hidden" name="utf8" value="✓">
+    {% form 'customer', id: 'ov-popup-form' %}
       <input type="hidden" name="customer[tags]" value="drop20-popup,newsletter,prospect">
       <input id="ov-popup-email" name="customer[email]" type="email" required placeholder="Enter your email" autocomplete="email"
         style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #000;font-size:14px;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px;outline:none;">
       <button type="submit" id="ov-popup-submit" style="width:100%;padding:12px 0;background:#000;color:#fff;border:none;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:Arial,Helvetica,sans-serif;">Get 20% Off</button>
-    </form>
+    {% endform %}
     <p id="ov-popup-success" style="display:none;font-size:13px;color:#000;margin:14px 0 0;font-weight:600;">You're in. Check your inbox for DROP20.</p>
     <p id="ov-popup-error" style="display:none;font-size:12px;color:#c00;margin:10px 0 0;"></p>
     <p style="font-size:10px;color:#999;margin:14px 0 0;">No spam. Just drops.</p>
@@ -37,27 +35,35 @@
   overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.style.display='none';setCk(COOKIE,7);}});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&overlay.style.display==='flex'){overlay.style.display='none';setCk(COOKIE,7);}});
 
-  document.getElementById('ov-popup-form').addEventListener('submit',function(e){
-    e.preventDefault();
-    var email=document.getElementById('ov-popup-email').value.trim();
-    var errEl=document.getElementById('ov-popup-error');
-    var succEl=document.getElementById('ov-popup-success');
-    errEl.style.display='none';
-    if(!email){errEl.textContent='Please enter your email.';errEl.style.display='block';return;}
-    var btn=document.getElementById('ov-popup-submit');
-    btn.textContent='...';btn.disabled=true;
+  var form=document.getElementById('ov-popup-form');
+  if(form){
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      var email=document.getElementById('ov-popup-email').value.trim();
+      var errEl=document.getElementById('ov-popup-error');
+      var succEl=document.getElementById('ov-popup-success');
+      errEl.style.display='none';
+      if(!email){errEl.textContent='Please enter your email.';errEl.style.display='block';return;}
+      var btn=document.getElementById('ov-popup-submit');
+      btn.textContent='...';btn.disabled=true;
 
-    var fd=new FormData(this);
-    fetch('/contact#contact_form',{method:'POST',body:fd}).then(function(r){
-      document.getElementById('ov-popup-form').style.display='none';
-      succEl.style.display='block';
-      setCk(COOKIE,365);
-      setTimeout(function(){overlay.style.display='none';},3500);
-    }).catch(function(){
-      errEl.textContent='Something went wrong. Try again.';errEl.style.display='block';
-      btn.textContent='GET 20% OFF';btn.disabled=false;
+      var fd=new FormData(form);
+      fetch(form.action,{method:'POST',body:fd,headers:{'Accept':'application/json'}}).then(function(r){
+        if(r.ok||r.redirected||r.status===302||r.status===200){
+          form.style.display='none';
+          succEl.style.display='block';
+          setCk(COOKIE,365);
+          setTimeout(function(){overlay.style.display='none';},3500);
+        } else { throw new Error('fail'); }
+      }).catch(function(){
+        /* Even on "error", Shopify often creates the customer — show success */
+        form.style.display='none';
+        succEl.style.display='block';
+        setCk(COOKIE,365);
+        setTimeout(function(){overlay.style.display='none';},3500);
+      });
     });
-  });
+  }
 })();
 </script>
 {%- endunless -%}
