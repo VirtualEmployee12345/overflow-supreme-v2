@@ -213,9 +213,6 @@
             data-title="{{ col.title | remove: '-' | escape }}"
           >
             <span class="drops-list__name">
-              {%- if drop_index == 0 -%}
-                <span class="drops-list__new-dot" title="Latest drop"></span>
-              {%- endif -%}
               {{ col.title | remove: '-' }}
             </span>
             <span class="drops-list__meta">
@@ -242,9 +239,24 @@
 
 <script>
 (function() {
+  // Reverse list so newest drop is first
+  var listEl = document.getElementById('drops-list');
+  if (listEl) {
+    var items = Array.from(listEl.querySelectorAll('.drops-list__item'));
+    items.reverse().forEach(function(item) { listEl.appendChild(item); });
+
+    // Add red dot to the first item (newest drop) after reversal
+    var firstName = listEl.querySelector('.drops-list__item .drops-list__name');
+    if (firstName) {
+      var dot = document.createElement('span');
+      dot.className = 'drops-list__new-dot';
+      dot.title = 'Latest drop';
+      firstName.insertBefore(dot, firstName.firstChild);
+    }
+  }
+
   // Update the count label
   var countEl = document.getElementById('drops-list-count');
-  var listEl  = document.getElementById('drops-list');
   if (countEl && listEl) {
     var n = listEl.querySelectorAll('.drops-list__item').length;
     countEl.textContent = n + ' drop' + (n !== 1 ? 's' : '');
