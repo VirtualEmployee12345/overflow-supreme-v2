@@ -1,5 +1,26 @@
 <!-- Overflow Email Popup — DROP20 -->
 {%- unless customer -%}
+{%- comment -%}Show success if user just signed up (redirected back with ?customer_posted=true){%- endcomment -%}
+{%- if form.posted_successfully? -%}
+  <script>
+    document.addEventListener('DOMContentLoaded',function(){
+      var ck='ov_popup_seen';
+      var e=new Date();e.setDate(e.getDate()+365);
+      document.cookie=ck+'=1;expires='+e.toUTCString()+';path=/;SameSite=Lax';
+    });
+  </script>
+  <div id="ov-popup-overlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+    <div style="background:#fff;max-width:400px;width:90%;margin:auto;padding:36px 28px;text-align:center;font-family:Arial,Helvetica,sans-serif;position:relative;">
+      <button onclick="this.closest('[id]').parentElement.style.display='none'" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#000;line-height:1;">&times;</button>
+      <h2 style="font-size:24px;font-weight:700;margin:0 0 12px;text-transform:uppercase;">You're in.</h2>
+      <p style="font-size:14px;color:#333;margin:0 0 18px;line-height:1.5;">Your code <strong>DROP20</strong> gets you 20% off your first order.</p>
+      <div style="background:#f5f5f5;padding:14px 16px;margin:0 0 20px;">
+        <p style="font-size:22px;font-weight:700;margin:0;letter-spacing:2px;">DROP20</p>
+      </div>
+      <a href="/" style="display:inline-block;background:#000;color:#fff;padding:14px 40px;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;">Start Shopping</a>
+    </div>
+  </div>
+{%- else -%}
 <div id="ov-popup-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);align-items:center;justify-content:center;">
   <div id="ov-popup" style="background:#fff;max-width:400px;width:90%;margin:auto;padding:32px 28px 28px;position:relative;text-align:center;font-family:Arial,Helvetica,sans-serif;">
     <button id="ov-popup-close" aria-label="Close" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#000;line-height:1;">&times;</button>
@@ -11,17 +32,13 @@
       <p style="font-size:22px;font-weight:700;margin:0;letter-spacing:2px;">DROP20</p>
       <p style="font-size:12px;color:#666;margin:4px 0 0;">20% off your first order</p>
     </div>
-    <div id="ov-popup-formwrap">
-      {% form 'customer', id: 'ov-popup-form' %}
-        {{ form.errors | default_errors }}
-        <input type="hidden" name="customer[tags]" value="drop20-popup,newsletter,prospect">
-        <input id="ov-popup-email" name="customer[email]" type="email" required placeholder="Enter your email" autocomplete="email"
-          style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #000;font-size:14px;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px;outline:none;">
-        <button type="submit" id="ov-popup-submit" style="width:100%;padding:12px 0;background:#000;color:#fff;border:none;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:Arial,Helvetica,sans-serif;">Get 20% Off</button>
-      {% endform %}
-    </div>
-    <p id="ov-popup-success" style="display:none;font-size:13px;color:#000;margin:14px 0 0;font-weight:600;">You're in. Check your inbox for DROP20.</p>
-    <p id="ov-popup-error" style="display:none;font-size:12px;color:#c00;margin:10px 0 0;"></p>
+    {% form 'customer', id: 'ov-popup-form', return_to: request.path %}
+      {{ form.errors | default_errors }}
+      <input type="hidden" name="customer[tags]" value="drop20-popup,newsletter,prospect">
+      <input id="ov-popup-email" name="customer[email]" type="email" required placeholder="Enter your email" autocomplete="email"
+        style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #000;font-size:14px;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px;outline:none;">
+      <button type="submit" id="ov-popup-submit" style="width:100%;padding:12px 0;background:#000;color:#fff;border:none;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:Arial,Helvetica,sans-serif;">Get 20% Off</button>
+    {% endform %}
     <p style="font-size:10px;color:#999;margin:14px 0 0;">No spam. Just drops.</p>
   </div>
 </div>
@@ -34,44 +51,13 @@
   var overlay=document.getElementById('ov-popup-overlay');
   if(!overlay)return;
   setTimeout(function(){overlay.style.display='flex';},DELAY);
-  document.getElementById('ov-popup-close').addEventListener('click',function(){overlay.style.display='none';setCk(COOKIE,7);});
+  var closeBtn=document.getElementById('ov-popup-close');
+  if(closeBtn)closeBtn.addEventListener('click',function(){overlay.style.display='none';setCk(COOKIE,7);});
   overlay.addEventListener('click',function(e){if(e.target===overlay){overlay.style.display='none';setCk(COOKIE,7);}});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&overlay.style.display==='flex'){overlay.style.display='none';setCk(COOKIE,7);}});
-
-  var form=document.getElementById('ov-popup-form');
-  if(!form)return;
-
-  form.addEventListener('submit',function(e){
-    e.preventDefault();
-    var email=document.getElementById('ov-popup-email').value.trim();
-    var errEl=document.getElementById('ov-popup-error');
-    var succEl=document.getElementById('ov-popup-success');
-    var wrap=document.getElementById('ov-popup-formwrap');
-    errEl.style.display='none';
-    if(!email){errEl.textContent='Please enter your email.';errEl.style.display='block';return;}
-
-    var btn=document.getElementById('ov-popup-submit');
-    btn.textContent='...';btn.disabled=true;
-
-    /* Submit via fetch with same-origin credentials */
-    var fd=new FormData(form);
-    fetch(form.action,{
-      method:'POST',
-      body:new URLSearchParams(fd),
-      credentials:'same-origin',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'}
-    }).then(function(){
-      wrap.style.display='none';
-      succEl.style.display='block';
-      setCk(COOKIE,365);
-      setTimeout(function(){overlay.style.display='none';},3500);
-    }).catch(function(){
-      wrap.style.display='none';
-      succEl.style.display='block';
-      setCk(COOKIE,365);
-      setTimeout(function(){overlay.style.display='none';},3500);
-    });
-  });
+  var btn=document.getElementById('ov-popup-submit');
+  if(btn)btn.addEventListener('click',function(){setTimeout(function(){btn.textContent='...';},50);});
 })();
 </script>
+{%- endif -%}
 {%- endunless -%}
