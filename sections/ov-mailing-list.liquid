@@ -1,0 +1,174 @@
+{% style %}
+  .ov-mailing-list {
+    min-height: calc(100vh - 180px);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3.2rem 1.6rem 2.4rem;
+    color: #111;
+  }
+  .ov-mailing-list__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e1251b;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    width: 13rem;
+    height: 4rem;
+    text-decoration: none;
+    text-transform: none;
+  }
+  .ov-mailing-list__stamp,
+  .ov-mailing-list__label,
+  .ov-mailing-list__disclaimer,
+  .ov-mailing-list__success,
+  .ov-mailing-list__error,
+  .ov-mailing-list__footer,
+  .ov-mailing-list__button,
+  .ov-mailing-list__input {
+    font-family: "Courier New", Courier, monospace;
+  }
+  .ov-mailing-list__stamp {
+    margin-top: 1.2rem;
+    font-size: 1.3rem;
+    color: #111;
+    text-align: center;
+  }
+  .ov-mailing-list__formwrap {
+    width: min(66rem, 100%);
+    margin-top: clamp(8rem, 18vh, 17rem);
+  }
+  .ov-mailing-list__label,
+  .ov-mailing-list__disclaimer,
+  .ov-mailing-list__success,
+  .ov-mailing-list__error,
+  .ov-mailing-list__footer {
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: #111;
+  }
+  .ov-mailing-list__label {
+    margin: 0 0 1rem;
+    text-transform: lowercase;
+  }
+  .ov-mailing-list__input {
+    width: 100%;
+    height: 4rem;
+    border: 1px solid #cfcfcf;
+    border-radius: 0;
+    padding: 0 1.1rem;
+    font-size: 1.3rem;
+    color: #111;
+    background: #fff;
+    box-sizing: border-box;
+  }
+  .ov-mailing-list__input::placeholder { color: #8a8a8a; text-transform: lowercase; }
+  .ov-mailing-list__disclaimer { margin: 0.8rem 0 1rem; text-transform: lowercase; }
+  .ov-mailing-list__button {
+    appearance: none;
+    border: 0;
+    border-radius: 0;
+    background: #e1251b;
+    color: #fff;
+    padding: 0.9rem 1.6rem;
+    font-size: 1.3rem;
+    line-height: 1;
+    text-transform: lowercase;
+    cursor: pointer;
+  }
+  .ov-mailing-list__button[disabled] { opacity: .7; cursor: default; }
+  .ov-mailing-list__success,
+  .ov-mailing-list__error { margin-top: 1rem; }
+  .ov-mailing-list__error { color: #b30000; }
+  .ov-mailing-list__footer {
+    margin-top: auto;
+    width: min(120rem, 100%);
+    display: flex;
+    justify-content: space-between;
+    gap: 1.6rem;
+    padding-top: 7rem;
+    text-transform: lowercase;
+    flex-wrap: wrap;
+  }
+  .ov-mailing-list__footer a {
+    color: #111;
+    text-decoration: none;
+  }
+  .ov-mailing-list__footer-right {
+    display: flex;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+  }
+  @media screen and (max-width: 749px) {
+    .ov-mailing-list { padding-top: 2.4rem; }
+    .ov-mailing-list__logo { width: 11.6rem; height: 3.6rem; font-size: 1.8rem; }
+    .ov-mailing-list__formwrap { margin-top: 7rem; }
+    .ov-mailing-list__footer { padding-top: 5rem; flex-direction: column; gap: 1rem; }
+    .ov-mailing-list__footer-right { gap: 1rem 1.4rem; }
+  }
+{% endstyle %}
+
+<section class="ov-mailing-list">
+  <a href="/" class="ov-mailing-list__logo" aria-label="Overflow home">Overflow</a>
+  <div class="ov-mailing-list__stamp" id="ov-mailing-list-stamp"></div>
+
+  <div class="ov-mailing-list__formwrap">
+    <p class="ov-mailing-list__label">add my email to your mailing list</p>
+    {%- form 'customer', id: 'OvMailingListForm' -%}
+      <input type="hidden" name="contact[tags]" value="drop20-popup,newsletter,prospect">
+      <input type="hidden" name="contact[accepts_marketing]" value="true">
+      <input id="ov-mailing-list-email" class="ov-mailing-list__input" type="email" name="contact[email]" inputmode="email" autocomplete="email" placeholder="your email" value="{% if form.email %}{{ form.email }}{% endif %}" required>
+      <p class="ov-mailing-list__disclaimer">i understand that i can opt out at any time</p>
+      <button type="submit" id="ov-mailing-list-submit" class="ov-mailing-list__button">subscribe</button>
+      {%- if form.posted_successfully? -%}
+        <p id="ov-mailing-list-success" class="ov-mailing-list__success">check your email for your discount code.</p>
+        <script>document.cookie='ov_popup_seen=1;path=/;max-age='+(60*60*24*365)+';SameSite=Lax';</script>
+      {%- endif -%}
+      {%- if form.errors -%}
+        <p id="ov-mailing-list-error" class="ov-mailing-list__error">something went wrong. please try again.</p>
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+
+  <div class="ov-mailing-list__footer">
+    <div class="ov-mailing-list__footer-left"><a href="/collections/all">shop</a></div>
+    <div class="ov-mailing-list__footer-right">
+      <a href="/pages/drops">drops</a>
+      <a href="/pages/about">about</a>
+      <a href="/pages/contact">contact</a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var stamp = document.getElementById('ov-mailing-list-stamp');
+  if (stamp) {
+    try {
+      var now = new Date();
+      var mo = String(now.getMonth()+1).padStart(2,'0');
+      var da = String(now.getDate()).padStart(2,'0');
+      var yr = now.getFullYear();
+      var hr = now.getHours();
+      var mn = String(now.getMinutes()).padStart(2,'0');
+      var ampm = hr >= 12 ? 'pm' : 'am';
+      var hr12 = hr % 12; if (hr12 === 0) hr12 = 12;
+      stamp.textContent = mo + '/' + da + '/' + yr + ' ' + hr12 + ':' + mn + ampm + ' new york';
+    } catch(e) {}
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Overflow mailing list",
+  "settings": []
+}
+{% endschema %}
