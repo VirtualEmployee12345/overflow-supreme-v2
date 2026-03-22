@@ -2,21 +2,113 @@
 
 {%- style -%}
   .footer { margin-top: 0; }
+  .footer-brutalist__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+  }
+  .footer-brutalist__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.4rem;
+  }
+  @media screen and (min-width: 750px) {
+    .footer-brutalist__rows {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .footer-brutalist__row--right {
+      text-align: right;
+    }
+  }
+  .footer-brutalist__social {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    margin-top: 0.4rem;
+  }
+  .footer-brutalist__social-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .footer-brutalist__social-icon:hover {
+    opacity: 1;
+  }
+  .footer-brutalist__social-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  .footer-brutalist__trust {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-top: 0.6rem;
+  }
 {%- endstyle -%}
 
 <footer class="footer footer-brutalist color-{{ section.settings.color_scheme }} gradient">
   <div class="footer-brutalist__inner">
-    <div class="footer-brutalist__primary">
-      <a href="/" class="footer-brutalist__link{% if request.path == '/' %} footer-brutalist__link--active{% endif %}">home</a>
-      <a href="/pages/drops" class="footer-brutalist__link{% if request.path contains 'drops' %} footer-brutalist__link--active{% endif %}">View All</a>
-      <a href="/collections/all" class="footer-brutalist__link{% if collection.handle == 'all' %} footer-brutalist__link--active{% endif %}">shop all</a>
+    <div class="footer-brutalist__rows">
+      {%- comment -%} Left column: navigation + policies {%- endcomment -%}
+      <div class="footer-brutalist__row">
+        <a href="/" class="footer-brutalist__link{% if request.path == '/' %} footer-brutalist__link--active{% endif %}">home</a>
+        <a href="/pages/drops" class="footer-brutalist__link{% if request.path contains 'drops' %} footer-brutalist__link--active{% endif %}">drops</a>
+        <a href="/collections/all" class="footer-brutalist__link{% if collection.handle == 'all' %} footer-brutalist__link--active{% endif %}">shop all</a>
+        <a href="/pages/about" class="footer-brutalist__link">about</a>
+        <a href="/pages/contact" class="footer-brutalist__link">contact</a>
+        <a href="/pages/mailing-list" class="footer-brutalist__link{% if request.path contains 'mailing-list' %} footer-brutalist__link--active{% endif %}">mailing list</a>
+      </div>
+
+      {%- comment -%} Right column: policies + social {%- endcomment -%}
+      <div class="footer-brutalist__row footer-brutalist__row--right">
+        {%- if shop.privacy_policy.url != blank -%}
+          <a href="{{ shop.privacy_policy.url }}" class="footer-brutalist__link">privacy</a>
+        {%- endif -%}
+        {%- if shop.terms_of_service.url != blank -%}
+          <a href="{{ shop.terms_of_service.url }}" class="footer-brutalist__link">terms</a>
+        {%- endif -%}
+        {%- if shop.refund_policy.url != blank -%}
+          <a href="{{ shop.refund_policy.url }}" class="footer-brutalist__link">returns</a>
+        {%- endif -%}
+        {%- if shop.shipping_policy.url != blank -%}
+          <a href="{{ shop.shipping_policy.url }}" class="footer-brutalist__link">shipping</a>
+        {%- endif -%}
+      </div>
     </div>
 
-    <div class="footer-brutalist__secondary">
-      <a href="/pages/about" class="footer-brutalist__link">about</a>
-      <a href="/pages/contact" class="footer-brutalist__link">contact</a>
-      <a href="/pages/mailing-list" class="footer-brutalist__link{% if request.path contains 'mailing-list' %} footer-brutalist__link--active{% endif %}">mailing list</a>
-    </div>
+    {%- comment -%} Social icons row — uses theme settings {%- endcomment -%}
+    {%- if settings.social_instagram_link != blank or settings.social_tiktok_link != blank or settings.social_twitter_link != blank or settings.social_facebook_link != blank -%}
+      <div class="footer-brutalist__social">
+        {%- if settings.social_instagram_link != blank -%}
+          <a href="{{ settings.social_instagram_link }}" class="footer-brutalist__social-icon" aria-label="Instagram" target="_blank" rel="noopener">
+            {{- 'icon-instagram.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_tiktok_link != blank -%}
+          <a href="{{ settings.social_tiktok_link }}" class="footer-brutalist__social-icon" aria-label="TikTok" target="_blank" rel="noopener">
+            {{- 'icon-tiktok.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_twitter_link != blank -%}
+          <a href="{{ settings.social_twitter_link }}" class="footer-brutalist__social-icon" aria-label="Twitter" target="_blank" rel="noopener">
+            {{- 'icon-twitter.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_facebook_link != blank -%}
+          <a href="{{ settings.social_facebook_link }}" class="footer-brutalist__social-icon" aria-label="Facebook" target="_blank" rel="noopener">
+            {{- 'icon-facebook.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="footer-brutalist__trust">&copy; {{ 'now' | date: '%Y' }} {{ shop.name }} &middot; Secure checkout &middot; All rights reserved</div>
   </div>
 </footer>
 
