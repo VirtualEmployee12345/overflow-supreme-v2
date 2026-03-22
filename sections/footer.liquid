@@ -70,20 +70,36 @@
         {%- if shop.privacy_policy.url != blank -%}
           <a href="{{ shop.privacy_policy.url }}" class="footer-brutalist__link">privacy</a>
         {%- endif -%}
+
+        {%- comment -%} Terms of Service — prefer Shopify legal page, fall back to custom page {%- endcomment -%}
         {%- if shop.terms_of_service.url != blank -%}
           <a href="{{ shop.terms_of_service.url }}" class="footer-brutalist__link">terms</a>
+        {%- else -%}
+          <a href="/pages/terms-of-service" class="footer-brutalist__link">terms</a>
         {%- endif -%}
+
+        {%- comment -%} Refund Policy — prefer Shopify legal page, fall back to custom page {%- endcomment -%}
         {%- if shop.refund_policy.url != blank -%}
           <a href="{{ shop.refund_policy.url }}" class="footer-brutalist__link">returns</a>
+        {%- else -%}
+          <a href="/pages/refund-policy" class="footer-brutalist__link">returns</a>
         {%- endif -%}
+
+        {%- comment -%} Shipping Policy — prefer Shopify legal page, fall back to custom page {%- endcomment -%}
         {%- if shop.shipping_policy.url != blank -%}
           <a href="{{ shop.shipping_policy.url }}" class="footer-brutalist__link">shipping</a>
+        {%- else -%}
+          <a href="/pages/shipping-policy" class="footer-brutalist__link">shipping</a>
         {%- endif -%}
       </div>
     </div>
 
-    {%- comment -%} Social icons row — uses theme settings {%- endcomment -%}
-    {%- if settings.social_instagram_link != blank or settings.social_tiktok_link != blank or settings.social_twitter_link != blank or settings.social_facebook_link != blank -%}
+    {%- comment -%} Social icons row — renders all supported platforms from theme settings {%- endcomment -%}
+    {%- assign has_social = false -%}
+    {%- if settings.social_instagram_link != blank or settings.social_tiktok_link != blank or settings.social_twitter_link != blank or settings.social_facebook_link != blank or settings.social_youtube_link != blank or settings.social_pinterest_link != blank or settings.social_snapchat_link != blank or settings.social_tumblr_link != blank or settings.social_vimeo_link != blank -%}
+      {%- assign has_social = true -%}
+    {%- endif -%}
+    {%- if has_social -%}
       <div class="footer-brutalist__social">
         {%- if settings.social_instagram_link != blank -%}
           <a href="{{ settings.social_instagram_link }}" class="footer-brutalist__social-icon" aria-label="Instagram" target="_blank" rel="noopener">
@@ -103,6 +119,31 @@
         {%- if settings.social_facebook_link != blank -%}
           <a href="{{ settings.social_facebook_link }}" class="footer-brutalist__social-icon" aria-label="Facebook" target="_blank" rel="noopener">
             {{- 'icon-facebook.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_youtube_link != blank -%}
+          <a href="{{ settings.social_youtube_link }}" class="footer-brutalist__social-icon" aria-label="YouTube" target="_blank" rel="noopener">
+            {{- 'icon-youtube.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_pinterest_link != blank -%}
+          <a href="{{ settings.social_pinterest_link }}" class="footer-brutalist__social-icon" aria-label="Pinterest" target="_blank" rel="noopener">
+            {{- 'icon-pinterest.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_snapchat_link != blank -%}
+          <a href="{{ settings.social_snapchat_link }}" class="footer-brutalist__social-icon" aria-label="Snapchat" target="_blank" rel="noopener">
+            {{- 'icon-snapchat.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_tumblr_link != blank -%}
+          <a href="{{ settings.social_tumblr_link }}" class="footer-brutalist__social-icon" aria-label="Tumblr" target="_blank" rel="noopener">
+            {{- 'icon-tumblr.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+        {%- if settings.social_vimeo_link != blank -%}
+          <a href="{{ settings.social_vimeo_link }}" class="footer-brutalist__social-icon" aria-label="Vimeo" target="_blank" rel="noopener">
+            {{- 'icon-vimeo.svg' | inline_asset_content -}}
           </a>
         {%- endif -%}
       </div>
