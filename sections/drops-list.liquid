@@ -1,14 +1,13 @@
 {% comment %}
   drops-list.liquid
-  
-  Vertical list of all drop collections.
-  - Each row = drop title (left) + item count (right)
-  - Hovering a row reveals the drop's hero photo in a fixed-position preview panel
-  - Clicking a row navigates to /collections/{handle}
+
+  Visual grid of all drop collections with thumbnail cards.
+  - Each card shows the drop hero image, title, and item count
+  - Newest drops appear first (reversed via JS)
+  - Links use {{ col.url }} to always point to the real Shopify collection URL
   - New drops appear automatically as long as their handle starts with "drop-"
-  
-  Hero photos are stored in collection metafield: custom.hero_photo_url
-  Fallback: uses collection.image if metafield not set
+
+  Hero photos: collection metafield custom.hero_photo_url, fallback to collection.image
 {% endcomment %}
 
 <style>
@@ -41,124 +40,91 @@
     letter-spacing: 0.06em;
   }
 
-  /* ── List ── */
-  .drops-list {
+  /* ── Grid of drop cards ── */
+  .drops-grid {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .drops-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px; }
+  }
+  @media (max-width: 480px) {
+    .drops-grid { grid-template-columns: 1fr; gap: 14px; padding: 14px; }
   }
 
-  .drops-list__item {
-    border-bottom: 1px solid #e8e8e8;
-  }
-
-  .drops-list__link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    height: 56px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.1s;
+  .drops-grid__card {
     position: relative;
   }
 
-  .drops-list__link:hover,
-  .drops-list__link:focus {
-    background: #f7f7f7;
-  }
-
-  .drops-list__name {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  .drops-grid__link {
+    display: block;
+    text-decoration: none;
     color: #000;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .drops-grid__link:hover {
+    border-color: #e0e0e0;
   }
 
-  /* Red indicator dot for newest drop */
-  .drops-list__new-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: #d4021d;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .drops-list__meta {
-    font-size: 10px;
-    color: #888;
-    letter-spacing: 0.06em;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .drops-list__count {
-    font-size: 10px;
-    color: #888;
-  }
-
-  /* Arrow that appears on hover */
-  .drops-list__arrow {
-    font-size: 14px;
-    color: #d4021d;
-    opacity: 0;
-    transform: translateX(-6px);
-    transition: opacity 0.12s, transform 0.12s;
-    line-height: 1;
-  }
-  .drops-list__link:hover .drops-list__arrow,
-  .drops-list__link:focus .drops-list__arrow {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  /* ── Floating image preview ── */
-  .drops-preview {
-    position: fixed;
-    top: 50%;
-    right: 60px;
-    transform: translateY(-50%) scale(0.95);
-    width: 380px;
-    max-width: 38vw;
-    aspect-ratio: 4/3;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 200;
+  .drops-grid__image-wrap {
+    aspect-ratio: 4 / 3;
     overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    background: #f5f5f5;
+    position: relative;
   }
-  .drops-preview.visible {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
-  }
-  .drops-preview img {
+  .drops-grid__image-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
-  /* Label overlay on preview */
-  .drops-preview__label {
+
+  /* NEW badge for latest drop */
+  .drops-grid__badge {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0,0,0,0.55);
+    top: 8px;
+    left: 8px;
+    background: #d4021d;
     color: #fff;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding: 10px 14px;
+    padding: 3px 7px;
+    line-height: 1;
+  }
+
+  .drops-grid__info {
+    padding: 10px 12px 12px;
+  }
+  .drops-grid__title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+    line-height: 1.3;
+    color: #000;
+  }
+  .drops-grid__meta {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.04em;
+  }
+
+  .drops-grid__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   /* ── Empty state ── */
@@ -168,19 +134,9 @@
     color: #888;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-  }
-
-  /* Hide preview on mobile — not enough space */
-  @media (max-width: 768px) {
-    .drops-preview { display: none; }
-    .drops-list__link { height: 64px; }
-    .drops-list__name { font-size: 12px; }
+    list-style: none;
   }
 </style>
-
-{%- comment -%} Collect all drop collections — handle must start with "drop-" {%- endcomment -%}
-{%- assign drop_collections = '' -%}
-{%- assign all_collections = collections -%}
 
 <div class="drops-list-section">
   <div class="drops-list-header">
@@ -189,15 +145,8 @@
   </div>
 
   {%- assign drop_count = 0 -%}
-  {%- assign drop_index = 0 -%}
 
-  {%- comment -%}
-    Shopify Liquid can't filter collections by handle prefix dynamically,
-    so we render all collections and use CSS/JS to show only drops.
-    We hide non-drop collections server-side with a Liquid check.
-  {%- endcomment -%}
-
-  <ul class="drops-list" id="drops-list">
+  <ul class="drops-grid" id="drops-list">
     {%- for col in collections -%}
       {%- if col.handle contains 'drop-' -%}
         {%- assign drop_count = drop_count | plus: 1 -%}
@@ -205,23 +154,24 @@
         {%- if hero_url == blank and col.image -%}
           {%- assign hero_url = col.image | image_url: width: 800 -%}
         {%- endif -%}
-        <li class="drops-list__item">
-          <a
-            class="drops-list__link"
-            href="{{ col.url }}"
-            data-hero="{{ hero_url }}"
-            data-title="{{ col.title | remove: '-' | escape }}"
-          >
-            <span class="drops-list__name">
-              {{ col.title | remove: '-' }}
-            </span>
-            <span class="drops-list__meta">
-              <span class="drops-list__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
-              <span class="drops-list__arrow">→</span>
-            </span>
+        {%- assign first_product = col.products | first -%}
+        <li class="drops-grid__card">
+          <a class="drops-grid__link" href="{{ col.url }}">
+            <div class="drops-grid__image-wrap">
+              {%- if hero_url != blank -%}
+                <img src="{{ hero_url }}" alt="{{ col.title | escape }}" loading="lazy" width="600" height="450">
+              {%- elsif first_product and first_product.featured_media -%}
+                <img src="{{ first_product.featured_media | image_url: width: 600 }}" alt="{{ col.title | escape }}" loading="lazy" width="600" height="450">
+              {%- else -%}
+                <div class="drops-grid__placeholder">No preview</div>
+              {%- endif -%}
+            </div>
+            <div class="drops-grid__info">
+              <p class="drops-grid__title">{{ col.title }}</p>
+              <span class="drops-grid__meta">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
+            </div>
           </a>
         </li>
-        {%- assign drop_index = drop_index | plus: 1 -%}
       {%- endif -%}
     {%- endfor -%}
 
@@ -231,70 +181,30 @@
   </ul>
 </div>
 
-{%- comment -%} Floating preview panel — populated by JS {%- endcomment -%}
-<div class="drops-preview" id="drops-preview" aria-hidden="true">
-  <img src="" alt="" id="drops-preview-img" loading="lazy">
-  <div class="drops-preview__label" id="drops-preview-label"></div>
-</div>
-
 <script>
 (function() {
-  // Reverse list so newest drop is first
   var listEl = document.getElementById('drops-list');
-  if (listEl) {
-    var items = Array.from(listEl.querySelectorAll('.drops-list__item'));
-    items.reverse().forEach(function(item) { listEl.appendChild(item); });
+  if (!listEl) return;
 
-    // Add red dot to the first item (newest drop) after reversal
-    var firstName = listEl.querySelector('.drops-list__item .drops-list__name');
-    if (firstName) {
-      var dot = document.createElement('span');
-      dot.className = 'drops-list__new-dot';
-      dot.title = 'Latest drop';
-      firstName.insertBefore(dot, firstName.firstChild);
-    }
+  // Reverse so newest drop cards appear first
+  var items = Array.from(listEl.querySelectorAll('.drops-grid__card'));
+  items.reverse().forEach(function(item) { listEl.appendChild(item); });
+
+  // Add NEW badge to the first card (newest drop)
+  var firstWrap = listEl.querySelector('.drops-grid__card .drops-grid__image-wrap');
+  if (firstWrap) {
+    var badge = document.createElement('span');
+    badge.className = 'drops-grid__badge';
+    badge.textContent = 'NEW';
+    firstWrap.appendChild(badge);
   }
 
   // Update the count label
   var countEl = document.getElementById('drops-list-count');
-  if (countEl && listEl) {
-    var n = listEl.querySelectorAll('.drops-list__item').length;
+  if (countEl) {
+    var n = items.length;
     countEl.textContent = n + ' drop' + (n !== 1 ? 's' : '');
   }
-
-  // Hover preview
-  var preview   = document.getElementById('drops-preview');
-  var previewImg= document.getElementById('drops-preview-img');
-  var previewLbl= document.getElementById('drops-preview-label');
-  if (!preview || !previewImg || !previewLbl) return;
-
-  var links = document.querySelectorAll('.drops-list__link[data-hero]');
-  var hideTimer;
-
-  links.forEach(function(link) {
-    link.addEventListener('mouseenter', function() {
-      clearTimeout(hideTimer);
-      var hero  = link.getAttribute('data-hero');
-      var title = link.getAttribute('data-title');
-      if (!hero) return;
-
-      // Swap image only if changed (avoid flicker)
-      if (previewImg.src !== hero) {
-        previewImg.src = hero;
-        previewImg.alt = title;
-      }
-      previewLbl.textContent = title;
-      preview.classList.add('visible');
-      preview.removeAttribute('aria-hidden');
-    });
-
-    link.addEventListener('mouseleave', function() {
-      hideTimer = setTimeout(function() {
-        preview.classList.remove('visible');
-        preview.setAttribute('aria-hidden', 'true');
-      }, 80);
-    });
-  });
 })();
 </script>
 

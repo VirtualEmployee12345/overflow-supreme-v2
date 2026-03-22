@@ -172,38 +172,34 @@
     .supreme-product-card__sold-out-overlay { display: none; }
   }
 
-  {% if collection.handle == 'all' %}
-  /* ── Shop All title treatment: desktop hover, mobile always visible ── */
-  .supreme-product-card::after {
-    content: attr(aria-label);
+  /* ── Product title + price below card ── */
+  .supreme-product-card__details {
     display: block;
-    margin-top: 8px;
+    padding: 8px 0 4px;
+    text-decoration: none;
+  }
+  .supreme-product-card__title {
     font-family: "Courier New", Courier, monospace;
     font-size: 11px;
     font-weight: 400;
     color: #000;
     line-height: 1.4;
-    text-decoration: none;
-    opacity: 0;
-    transition: opacity 0.15s ease;
+    margin: 0;
     white-space: normal;
     word-break: break-word;
+    text-transform: none;
   }
-
-  @media screen and (min-width: 750px) {
-    .grid__item:hover .supreme-product-card::after {
-      opacity: 1;
-    }
+  .supreme-product-card__price {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    margin: 2px 0 0;
+    line-height: 1.3;
   }
-
-  @media screen and (max-width: 749px) {
-    .supreme-product-card::after {
-      opacity: 1;
-      margin-top: 6px;
-      padding-bottom: 8px;
-    }
+  .supreme-product-card__price--soldout {
+    color: #888;
   }
-  {% endif %}
 
   /* ── Loading ── */
   .loading-overlay { background: #fff !important; }
@@ -426,6 +422,16 @@
                     <span class="supreme-product-card__sold-out-text">sold<br>out</span>
                   </div>
                 {%- endunless -%}
+              </div>
+              <div class="supreme-product-card__details">
+                <p class="supreme-product-card__title">{{ product.title }}</p>
+                <p class="supreme-product-card__price{% unless product.available %} supreme-product-card__price--soldout{% endunless %}">
+                  {%- if product.available -%}
+                    {{ product.price | money }}
+                  {%- else -%}
+                    Sold out
+                  {%- endif -%}
+                </p>
               </div>
             </a>
           </li>

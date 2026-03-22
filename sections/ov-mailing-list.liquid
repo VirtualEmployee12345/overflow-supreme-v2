@@ -120,12 +120,12 @@
   <div class="ov-mailing-list__stamp" id="ov-mailing-list-stamp"></div>
 
   <div class="ov-mailing-list__formwrap">
-    <p class="ov-mailing-list__label">add my email to your mailing list</p>
+    <p class="ov-mailing-list__label">join the list &mdash; get 20% off your first order (code: DROP20)</p>
     {%- form 'customer', id: 'OvMailingListForm' -%}
       <input type="hidden" name="contact[tags]" value="drop20-popup,newsletter,prospect">
       <input type="hidden" name="contact[accepts_marketing]" value="true">
       <input id="ov-mailing-list-email" class="ov-mailing-list__input" type="email" name="contact[email]" inputmode="email" autocomplete="email" placeholder="your email" value="{% if form.email %}{{ form.email }}{% endif %}" required>
-      <p class="ov-mailing-list__disclaimer">i understand that i can opt out at any time</p>
+      <p class="ov-mailing-list__disclaimer">new drops, restocks &amp; exclusives. unsubscribe any time.</p>
       <button type="submit" id="ov-mailing-list-submit" class="ov-mailing-list__button">subscribe</button>
       {%- if form.posted_successfully? -%}
         <p id="ov-mailing-list-success" class="ov-mailing-list__success">check your email for your discount code.</p>
