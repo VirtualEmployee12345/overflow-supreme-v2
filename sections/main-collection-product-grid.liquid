@@ -296,12 +296,7 @@
     <nav class="supreme-sidebar__nav">
       {%- assign system_handles = 'new,all,frontpage,staff-picks,home-page' | split: ',' -%}
 
-      {%- comment -%} 1. NEW always first {%- endcomment -%}
-      <a href="/collections/new"
-        class="supreme-sidebar__link{% if collection.handle == 'new' %} supreme-sidebar__link--active{% endif %}"
-      >new</a>
-
-      {%- comment -%} 2. Dynamic descriptive collections {%- endcomment -%}
+      {%- comment -%} Dynamic descriptive collections {%- endcomment -%}
       {%- for col in collections -%}
         {%- assign h = col.handle -%}
         {%- assign skip = false -%}
@@ -330,7 +325,6 @@
     {%- comment -%} ── Mobile Category Dropdown ── {%- endcomment -%}
     <div class="supreme-mobile-filter">
       <select class="supreme-mobile-filter__select" aria-label="Filter by category" onchange="if(this.value) window.location.href=this.value;">
-        <option value="/collections/new"{% if collection.handle == 'new' %} selected{% endif %}>new</option>
         {%- for col in collections -%}
           {%- assign h = col.handle -%}
           {%- assign skip = false -%}
