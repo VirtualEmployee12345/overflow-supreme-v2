@@ -98,6 +98,10 @@
     line-height: 1;
   }
 
+  .drop-item__badge[hidden] {
+    display: none !important;
+  }
+
   .drop-item__label,
   .drop-item__count {
     font-size: 10px;
@@ -188,7 +192,8 @@
     gap: 14px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px 0 4px;
+    padding: 4px 44px 8px;
+    scroll-padding-inline: 44px;
     scroll-snap-type: x proximity;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
@@ -259,6 +264,11 @@
     letter-spacing: 0.05em;
     font-weight: 700;
     color: #000;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 3.3em;
   }
 
   .drop-product-card__price {
@@ -298,6 +308,8 @@
     .drop-rail {
       grid-auto-columns: minmax(180px, 220px);
       gap: 12px;
+      padding-inline: 36px;
+      scroll-padding-inline: 36px;
     }
   }
 
@@ -320,8 +332,9 @@
     }
 
     .drop-rail {
-      grid-auto-columns: 68vw;
-      padding-bottom: 8px;
+      grid-auto-columns: 82vw;
+      padding: 4px 0 8px;
+      scroll-padding-inline: 0;
     }
   }
 </style>
