@@ -75,7 +75,7 @@
 
   .product-grid--supreme {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 16px;
     padding: 0;
     margin: 0;
@@ -85,6 +85,69 @@
     isolation: isolate;
   }
 
+  .supreme-grid-area .pagination-wrapper {
+    margin-top: 28px;
+    padding: 20px 0 8px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    clear: both;
+  }
+
+  .supreme-grid-area .pagination__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .supreme-grid-area .pagination__list > li {
+    flex: 0 0 auto;
+    max-width: none;
+    margin: 0;
+  }
+
+  .supreme-grid-area .pagination__item {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #000;
+    background: #fff;
+    color: #000 !important;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .supreme-grid-area .pagination__item:hover {
+    background: #000;
+    color: #fff !important;
+  }
+
+  .supreme-grid-area .pagination__item--current,
+  .supreme-grid-area .pagination__item[aria-current="page"] {
+    background: #000;
+    color: #fff !important;
+  }
+
+  .supreme-grid-area .pagination__item--current::after,
+  .supreme-grid-area a.pagination__item:hover::after,
+  .supreme-grid-area .pagination__item-arrow:hover::after {
+    display: none;
+  }
+
+  .supreme-grid-area .pagination__item-arrow .icon {
+    width: 10px;
+    height: 10px;
+  }
+
   /* Filler cells to complete last row — white background */
   .grid__item--filler {
     background: #fff !important;
@@ -92,6 +155,9 @@
     visibility: hidden;
   }
 
+  @media screen and (max-width: 1200px) {
+    .product-grid--supreme { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
   @media screen and (max-width: 900px) {
     .product-grid--supreme { grid-template-columns: repeat(3, 1fr); }
   }
@@ -401,7 +467,7 @@
                       {{ product.featured_media | image_url }} {{ product.featured_media.width }}w
                     "
                     src="{{ product.featured_media | image_url: width: 533 }}"
-                    sizes="(min-width: 900px) 25vw, (min-width: 600px) 33vw, 50vw"
+                    sizes="(min-width: 1200px) 16.66vw, (min-width: 900px) 20vw, (min-width: 600px) 33vw, 50vw"
                     alt="{{ product.featured_media.alt | escape | default: product.title | escape }}"
                     {% unless lazy_load == false %}loading="lazy"{% endunless %}
                     width="{{ product.featured_media.width }}"
@@ -431,9 +497,13 @@
           </li>
         {%- endfor -%}
         {%- comment -%} Fill remaining cells in last row with white fillers {%- endcomment -%}
-        {%- assign remainder = collection.products.size | modulo: 4 -%}
+        {%- assign columns = 6 -%}
+        {%- if request.page_type != 'collection' or request.design_mode -%}
+          {%- assign columns = 6 -%}
+        {%- endif -%}
+        {%- assign remainder = collection.products.size | modulo: columns -%}
         {%- if remainder != 0 -%}
-          {%- assign fillers = 4 | minus: remainder -%}
+          {%- assign fillers = columns | minus: remainder -%}
           {%- for i in (1..fillers) -%}
             <li class="grid__item grid__item--filler" aria-hidden="true"></li>
           {%- endfor -%}
