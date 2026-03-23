@@ -183,6 +183,7 @@
 
   .drop-rail-shell {
     position: relative;
+    padding-inline: 52px;
   }
 
   .drop-rail {
@@ -192,8 +193,8 @@
     gap: 14px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px 44px 8px;
-    scroll-padding-inline: 44px;
+    padding: 4px 0 8px;
+    scroll-padding-inline: 0;
     scroll-snap-type: x proximity;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
@@ -228,8 +229,8 @@
     cursor: default;
   }
 
-  .drop-rail-nav--prev { left: 8px; }
-  .drop-rail-nav--next { right: 8px; }
+  .drop-rail-nav--prev { left: 0; }
+  .drop-rail-nav--next { right: 0; }
 
   .drop-product-card {
     min-width: 0;
@@ -305,11 +306,13 @@
       padding: 0 16px 18px;
     }
 
+    .drop-rail-shell {
+      padding-inline: 44px;
+    }
+
     .drop-rail {
       grid-auto-columns: minmax(180px, 220px);
       gap: 12px;
-      padding-inline: 36px;
-      scroll-padding-inline: 36px;
     }
   }
 
@@ -325,6 +328,10 @@
 
     .drop-item__title {
       font-size: 15px;
+    }
+
+    .drop-rail-shell {
+      padding-inline: 0;
     }
 
     .drop-rail-nav {
@@ -377,7 +384,7 @@
           >
             <div class="drop-item__meta">
               <div class="drop-item__eyebrow">
-                <span class="drop-item__badge" data-new-badge hidden>New</span>
+                <span class="drop-item__badge" data-new-badge style="display:none;">New</span>
                 <span class="drop-item__label">Drop</span>
                 <span class="drop-item__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
               </div>
@@ -470,8 +477,13 @@
       countEl.textContent = items.length + ' drop' + (items.length === 1 ? '' : 's');
     }
 
+    items.forEach(function(item) {
+      var badge = item.querySelector('[data-new-badge]');
+      if (badge) badge.style.display = 'none';
+    });
+
     var newestBadge = items[0].querySelector('[data-new-badge]');
-    if (newestBadge) newestBadge.hidden = false;
+    if (newestBadge) newestBadge.style.display = 'inline-flex';
 
     function setRailButtons(railShell) {
       if (!railShell) return;
