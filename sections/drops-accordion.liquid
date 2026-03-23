@@ -65,14 +65,19 @@
     gap: 4px;
   }
 
-  .drop-item__meta-link,
+  .drop-item__title-link,
   .drop-item__preview-link {
     color: inherit;
     text-decoration: none;
-    display: block;
   }
 
-  .drop-item__meta-link:focus-visible,
+  .drop-item__title-link {
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .drop-item__title-link:focus-visible,
   .drop-item__preview-link:focus-visible,
   .drop-item__trigger:focus-visible {
     outline: 2px solid #000;
@@ -121,8 +126,7 @@
     color: #000;
   }
 
-  .drop-item__meta-link:hover .drop-item__title,
-  .drop-item__preview-link:hover + .drop-item__trigger,
+  .drop-item__title-link:hover .drop-item__title,
   .drop-item__preview-link:hover {
     opacity: 0.72;
   }
@@ -397,15 +401,15 @@
           data-updated-at="{{ col.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' }}"
         >
           <div class="drop-item__header">
-            <a class="drop-item__meta-link" href="{{ col.url }}">
-              <div class="drop-item__meta">
-                <div class="drop-item__eyebrow">
-                  <span class="drop-item__badge" data-new-badge style="display:none;">New</span>
-                  <span class="drop-item__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
-                </div>
-                <h2 class="drop-item__title">{{ col.title }}</h2>
+            <div class="drop-item__meta">
+              <div class="drop-item__eyebrow">
+                <span class="drop-item__badge" data-new-badge style="display:none;">New</span>
+                <span class="drop-item__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
               </div>
-            </a>
+              <a class="drop-item__title-link" href="{{ col.url }}">
+                <h2 class="drop-item__title">{{ col.title }}</h2>
+              </a>
+            </div>
 
             <a class="drop-item__preview-link" href="{{ col.url }}" {% if preview_url == blank %}hidden{% endif %}>
               <div class="drop-item__preview">
@@ -538,11 +542,22 @@
 
     items.forEach(function(item) {
       var trigger = item.querySelector('.drop-item__trigger');
-      if (!trigger) return;
-      trigger.addEventListener('click', function() {
-        if (item.classList.contains('is-open')) return;
-        openItem(item);
-      });
+      var header = item.querySelector('.drop-item__header');
+      if (trigger) {
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (item.classList.contains('is-open')) return;
+          openItem(item);
+        });
+      }
+
+      if (header) {
+        header.addEventListener('click', function(e) {
+          if (e.target.closest('a, button')) return;
+          if (item.classList.contains('is-open')) return;
+          openItem(item);
+        });
+      }
 
       var railShell = item.querySelector('.drop-rail-shell');
       var rail = item.querySelector('[data-rail]');
