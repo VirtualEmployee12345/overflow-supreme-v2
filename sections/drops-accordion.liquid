@@ -51,14 +51,7 @@
     border-top: 1px solid #000;
   }
 
-  .drop-item__trigger {
-    width: 100%;
-    appearance: none;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    text-align: left;
+  .drop-item__header {
     padding: 18px 24px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -66,15 +59,24 @@
     gap: 18px;
   }
 
-  .drop-item__trigger:focus-visible {
-    outline: 2px solid #000;
-    outline-offset: -2px;
-  }
-
   .drop-item__meta {
     min-width: 0;
     display: grid;
     gap: 4px;
+  }
+
+  .drop-item__meta-link,
+  .drop-item__preview-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  }
+
+  .drop-item__meta-link:focus-visible,
+  .drop-item__preview-link:focus-visible,
+  .drop-item__trigger:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
   }
 
   .drop-item__eyebrow {
@@ -102,7 +104,6 @@
     display: none !important;
   }
 
-  .drop-item__label,
   .drop-item__count {
     font-size: 10px;
     letter-spacing: 0.08em;
@@ -120,6 +121,12 @@
     color: #000;
   }
 
+  .drop-item__meta-link:hover .drop-item__title,
+  .drop-item__preview-link:hover + .drop-item__trigger,
+  .drop-item__preview-link:hover {
+    opacity: 0.72;
+  }
+
   .drop-item__preview {
     width: 120px;
     aspect-ratio: 4 / 3;
@@ -135,11 +142,25 @@
     object-fit: cover;
   }
 
+  .drop-item__trigger {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+  }
+
   .drop-item__chevron {
     width: 18px;
     height: 18px;
     position: relative;
-    justify-self: end;
     flex-shrink: 0;
   }
 
@@ -189,7 +210,7 @@
   .drop-rail {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(220px, 260px);
+    grid-auto-columns: minmax(165px, 195px);
     gap: 14px;
     overflow-x: auto;
     overflow-y: hidden;
@@ -292,8 +313,8 @@
       padding: 24px 16px 12px;
     }
 
-    .drop-item__trigger {
-      grid-template-columns: minmax(0, 1fr) auto;
+    .drop-item__header {
+      grid-template-columns: minmax(0, 1fr) auto auto;
       padding: 16px;
       gap: 14px;
     }
@@ -311,13 +332,13 @@
     }
 
     .drop-rail {
-      grid-auto-columns: minmax(180px, 220px);
+      grid-auto-columns: minmax(135px, 165px);
       gap: 12px;
     }
   }
 
   @media (max-width: 640px) {
-    .drop-item__trigger {
+    .drop-item__header {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: start;
     }
@@ -339,7 +360,7 @@
     }
 
     .drop-rail {
-      grid-auto-columns: 82vw;
+      grid-auto-columns: 62vw;
       padding: 4px 0 8px;
       scroll-padding-inline: 0;
     }
@@ -375,30 +396,35 @@
           data-published-at="{{ col.published_at | date: '%Y-%m-%dT%H:%M:%S%z' }}"
           data-updated-at="{{ col.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' }}"
         >
-          <button
-            class="drop-item__trigger"
-            type="button"
-            aria-expanded="false"
-            aria-controls="drop-panel-{{ section.id }}-{{ forloop.index0 }}"
-            id="drop-trigger-{{ section.id }}-{{ forloop.index0 }}"
-          >
-            <div class="drop-item__meta">
-              <div class="drop-item__eyebrow">
-                <span class="drop-item__badge" data-new-badge style="display:none;">New</span>
-                <span class="drop-item__label">Drop</span>
-                <span class="drop-item__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
+          <div class="drop-item__header">
+            <a class="drop-item__meta-link" href="{{ col.url }}">
+              <div class="drop-item__meta">
+                <div class="drop-item__eyebrow">
+                  <span class="drop-item__badge" data-new-badge style="display:none;">New</span>
+                  <span class="drop-item__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
+                </div>
+                <h2 class="drop-item__title">{{ col.title }}</h2>
               </div>
-              <h2 class="drop-item__title">{{ col.title }}</h2>
-            </div>
+            </a>
 
-            <div class="drop-item__preview" {% if preview_url == blank %}hidden{% endif %}>
-              {%- if preview_url != blank -%}
-                <img src="{{ preview_url }}" alt="{{ col.title | escape }}" loading="lazy" width="480" height="360">
-              {%- endif -%}
-            </div>
+            <a class="drop-item__preview-link" href="{{ col.url }}" {% if preview_url == blank %}hidden{% endif %}>
+              <div class="drop-item__preview">
+                {%- if preview_url != blank -%}
+                  <img src="{{ preview_url }}" alt="{{ col.title | escape }}" loading="lazy" width="480" height="360">
+                {%- endif -%}
+              </div>
+            </a>
 
-            <span class="drop-item__chevron" aria-hidden="true"></span>
-          </button>
+            <button
+              class="drop-item__trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="drop-panel-{{ section.id }}-{{ forloop.index0 }}"
+              id="drop-trigger-{{ section.id }}-{{ forloop.index0 }}"
+            >
+              <span class="drop-item__chevron" aria-hidden="true"></span>
+            </button>
+          </div>
 
           <div
             class="drop-item__panel"
