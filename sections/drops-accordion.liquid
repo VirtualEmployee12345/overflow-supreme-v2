@@ -1,0 +1,534 @@
+{% comment %}
+  drops-list.liquid
+
+  Drops page rendered as a vertical accordion of drop collections.
+  - Newest drops sort to the top by published_at, then updated_at, then title
+  - The newest drop opens by default
+  - Each row expands into a horizontally scrollable rail of products
+  - Product cards link directly to product pages
+  - Header includes drop title, item count, and preview thumbnail
+{% endcomment %}
+
+<style>
+  .drops-accordion-section {
+    background: #fff;
+    color: #000;
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 60vh;
+  }
+
+  .drops-accordion-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 32px 24px 12px;
+    border-bottom: 2px solid #000;
+  }
+
+  .drops-accordion-header h1 {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #000;
+  }
+
+  .drops-accordion-header span {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    white-space: nowrap;
+  }
+
+  .drops-accordion {
+    border-bottom: 1px solid #000;
+  }
+
+  .drop-item {
+    border-top: 1px solid #000;
+  }
+
+  .drop-item__trigger {
+    width: 100%;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    padding: 18px 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .drop-item__trigger:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: -2px;
+  }
+
+  .drop-item__meta {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .drop-item__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .drop-item__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #d4021d;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    line-height: 1;
+  }
+
+  .drop-item__label,
+  .drop-item__count {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #777;
+  }
+
+  .drop-item__title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .drop-item__preview {
+    width: 120px;
+    aspect-ratio: 4 / 3;
+    background: #f4f4f4;
+    overflow: hidden;
+    justify-self: end;
+  }
+
+  .drop-item__preview img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .drop-item__chevron {
+    width: 18px;
+    height: 18px;
+    position: relative;
+    justify-self: end;
+    flex-shrink: 0;
+  }
+
+  .drop-item__chevron::before,
+  .drop-item__chevron::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    width: 10px;
+    height: 1.5px;
+    background: #000;
+    transition: transform 0.22s ease;
+  }
+
+  .drop-item__chevron::before {
+    left: 0;
+    transform: rotate(45deg);
+  }
+
+  .drop-item__chevron::after {
+    right: 0;
+    transform: rotate(-45deg);
+  }
+
+  .drop-item.is-open .drop-item__chevron::before {
+    transform: rotate(-45deg);
+  }
+
+  .drop-item.is-open .drop-item__chevron::after {
+    transform: rotate(45deg);
+  }
+
+  .drop-item__panel {
+    display: none;
+    padding: 0 24px 24px;
+  }
+
+  .drop-item.is-open .drop-item__panel {
+    display: block;
+  }
+
+  .drop-rail-shell {
+    position: relative;
+  }
+
+  .drop-rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 260px);
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 4px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .drop-rail::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .drop-rail::-webkit-scrollbar-thumb {
+    background: #cfcfcf;
+  }
+
+  .drop-rail-nav {
+    position: absolute;
+    top: calc(50% - 18px);
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #000;
+    background: rgba(255, 255, 255, 0.92);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .drop-rail-nav[disabled] {
+    opacity: 0.28;
+    cursor: default;
+  }
+
+  .drop-rail-nav--prev { left: 8px; }
+  .drop-rail-nav--next { right: 8px; }
+
+  .drop-product-card {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .drop-product-card a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .drop-product-card__image {
+    aspect-ratio: 4 / 5;
+    background: #f4f4f4;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .drop-product-card__image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .drop-product-card__title {
+    margin: 0 0 4px;
+    font-size: 12px;
+    line-height: 1.35;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .drop-product-card__price {
+    font-size: 11px;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    color: #666;
+  }
+
+  .drops-accordion-empty {
+    padding: 48px 24px;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 900px) {
+    .drops-accordion-header {
+      padding: 24px 16px 12px;
+    }
+
+    .drop-item__trigger {
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 16px;
+      gap: 14px;
+    }
+
+    .drop-item__preview {
+      width: 96px;
+    }
+
+    .drop-item__panel {
+      padding: 0 16px 18px;
+    }
+
+    .drop-rail {
+      grid-auto-columns: minmax(180px, 220px);
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .drop-item__trigger {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+    }
+
+    .drop-item__preview {
+      display: none;
+    }
+
+    .drop-item__title {
+      font-size: 15px;
+    }
+
+    .drop-rail-nav {
+      display: none;
+    }
+
+    .drop-rail {
+      grid-auto-columns: 68vw;
+      padding-bottom: 8px;
+    }
+  }
+</style>
+
+<div class="drops-accordion-section">
+  <div class="drops-accordion-header">
+    <h1>All drops</h1>
+    <span id="drops-accordion-count"></span>
+  </div>
+
+  <div class="drops-accordion" id="drops-accordion">
+    {%- assign drop_count = 0 -%}
+
+    {%- for col in collections -%}
+      {%- if col.handle contains 'drop-' -%}
+        {%- assign drop_count = drop_count | plus: 1 -%}
+        {%- assign hero_url = col.metafields.custom.hero_photo_url.value -%}
+        {%- if hero_url == blank and col.image -%}
+          {%- assign hero_url = col.image | image_url: width: 480 -%}
+        {%- endif -%}
+        {%- assign first_product = col.products | first -%}
+        {%- assign preview_url = hero_url -%}
+        {%- if preview_url == blank and first_product and first_product.featured_media -%}
+          {%- assign preview_url = first_product.featured_media | image_url: width: 480 -%}
+        {%- endif -%}
+
+        <section
+          class="drop-item"
+          data-drop-item
+          data-title="{{ col.title | escape }}"
+          data-published-at="{{ col.published_at | date: '%Y-%m-%dT%H:%M:%S%z' }}"
+          data-updated-at="{{ col.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' }}"
+        >
+          <button
+            class="drop-item__trigger"
+            type="button"
+            aria-expanded="false"
+            aria-controls="drop-panel-{{ section.id }}-{{ forloop.index0 }}"
+            id="drop-trigger-{{ section.id }}-{{ forloop.index0 }}"
+          >
+            <div class="drop-item__meta">
+              <div class="drop-item__eyebrow">
+                <span class="drop-item__badge" data-new-badge hidden>New</span>
+                <span class="drop-item__label">Drop</span>
+                <span class="drop-item__count">{{ col.products_count }} item{% if col.products_count != 1 %}s{% endif %}</span>
+              </div>
+              <h2 class="drop-item__title">{{ col.title }}</h2>
+            </div>
+
+            <div class="drop-item__preview" {% if preview_url == blank %}hidden{% endif %}>
+              {%- if preview_url != blank -%}
+                <img src="{{ preview_url }}" alt="{{ col.title | escape }}" loading="lazy" width="480" height="360">
+              {%- endif -%}
+            </div>
+
+            <span class="drop-item__chevron" aria-hidden="true"></span>
+          </button>
+
+          <div
+            class="drop-item__panel"
+            id="drop-panel-{{ section.id }}-{{ forloop.index0 }}"
+            role="region"
+            aria-labelledby="drop-trigger-{{ section.id }}-{{ forloop.index0 }}"
+          >
+            <div class="drop-rail-shell">
+              <button class="drop-rail-nav drop-rail-nav--prev" type="button" aria-label="Scroll left" data-rail-prev>
+                &#8592;
+              </button>
+              <div class="drop-rail" data-rail>
+                {%- for product in col.products -%}
+                  <article class="drop-product-card">
+                    <a href="{{ product.url }}">
+                      <div class="drop-product-card__image">
+                        {%- if product.featured_media -%}
+                          <img
+                            src="{{ product.featured_media | image_url: width: 560 }}"
+                            alt="{{ product.title | escape }}"
+                            loading="lazy"
+                            width="560"
+                            height="700"
+                          >
+                        {%- endif -%}
+                      </div>
+                      <h3 class="drop-product-card__title">{{ product.title }}</h3>
+                      <div class="drop-product-card__price">
+                        {{ product.price | money }}
+                      </div>
+                    </a>
+                  </article>
+                {%- endfor -%}
+              </div>
+              <button class="drop-rail-nav drop-rail-nav--next" type="button" aria-label="Scroll right" data-rail-next>
+                &#8594;
+              </button>
+            </div>
+          </div>
+        </section>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if drop_count == 0 -%}
+      <div class="drops-accordion-empty">No drops yet — check back soon.</div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+  (function() {
+    var root = document.getElementById('drops-accordion');
+    if (!root) return;
+
+    var items = Array.from(root.querySelectorAll('[data-drop-item]'));
+    if (!items.length) return;
+
+    items.sort(function(a, b) {
+      var aPublished = Date.parse(a.getAttribute('data-published-at') || '') || 0;
+      var bPublished = Date.parse(b.getAttribute('data-published-at') || '') || 0;
+      if (bPublished !== aPublished) return bPublished - aPublished;
+
+      var aUpdated = Date.parse(a.getAttribute('data-updated-at') || '') || 0;
+      var bUpdated = Date.parse(b.getAttribute('data-updated-at') || '') || 0;
+      if (bUpdated !== aUpdated) return bUpdated - aUpdated;
+
+      return (a.getAttribute('data-title') || '').localeCompare(b.getAttribute('data-title') || '');
+    });
+
+    items.forEach(function(item) {
+      root.appendChild(item);
+    });
+
+    var countEl = document.getElementById('drops-accordion-count');
+    if (countEl) {
+      countEl.textContent = items.length + ' drop' + (items.length === 1 ? '' : 's');
+    }
+
+    var newestBadge = items[0].querySelector('[data-new-badge]');
+    if (newestBadge) newestBadge.hidden = false;
+
+    function setRailButtons(railShell) {
+      if (!railShell) return;
+      var rail = railShell.querySelector('[data-rail]');
+      var prev = railShell.querySelector('[data-rail-prev]');
+      var next = railShell.querySelector('[data-rail-next]');
+      if (!rail || !prev || !next) return;
+
+      var maxScroll = rail.scrollWidth - rail.clientWidth - 1;
+      prev.disabled = rail.scrollLeft <= 4;
+      next.disabled = rail.scrollLeft >= maxScroll;
+    }
+
+    function openItem(itemToOpen) {
+      items.forEach(function(item) {
+        var trigger = item.querySelector('.drop-item__trigger');
+        var shouldOpen = item === itemToOpen;
+        item.classList.toggle('is-open', shouldOpen);
+        if (trigger) trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+        if (shouldOpen) {
+          var shell = item.querySelector('.drop-rail-shell');
+          setRailButtons(shell);
+        }
+      });
+    }
+
+    items.forEach(function(item) {
+      var trigger = item.querySelector('.drop-item__trigger');
+      if (!trigger) return;
+      trigger.addEventListener('click', function() {
+        if (item.classList.contains('is-open')) return;
+        openItem(item);
+      });
+
+      var railShell = item.querySelector('.drop-rail-shell');
+      var rail = item.querySelector('[data-rail]');
+      var prev = item.querySelector('[data-rail-prev]');
+      var next = item.querySelector('[data-rail-next]');
+
+      if (rail && prev && next) {
+        prev.addEventListener('click', function(e) {
+          e.stopPropagation();
+          rail.scrollBy({ left: -Math.min(rail.clientWidth * 0.9, 420), behavior: 'smooth' });
+        });
+
+        next.addEventListener('click', function(e) {
+          e.stopPropagation();
+          rail.scrollBy({ left: Math.min(rail.clientWidth * 0.9, 420), behavior: 'smooth' });
+        });
+
+        rail.addEventListener('scroll', function() {
+          setRailButtons(railShell);
+        }, { passive: true });
+
+        window.addEventListener('resize', function() {
+          setRailButtons(railShell);
+        });
+      }
+    });
+
+    openItem(items[0]);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Drops Accordion",
+  "tag": "section",
+  "class": "section-drops-list",
+  "settings": [],
+  "presets": [{ "name": "Drops Accordion" }]
+}
+{% endschema %}
