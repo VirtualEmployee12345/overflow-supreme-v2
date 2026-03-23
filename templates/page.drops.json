@@ -9,12 +9,12 @@
  */
 {
   "sections": {
-    "drops_accordion": {
-      "type": "drops-accordion",
+    "drops_list": {
+      "type": "drops-list",
       "settings": {}
     }
   },
   "order": [
-    "drops_accordion"
+    "drops_list"
   ]
 }
