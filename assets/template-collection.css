@@ -149,12 +149,15 @@
 }
 
 .supreme-grid-area .pagination__list > li {
+  display: block;
   flex: 0 0 auto;
   max-width: none;
   margin: 0;
 }
 
 .supreme-grid-area .pagination__item {
+  display: inline-flex !important;
+  width: auto !important;
   min-width: 36px;
   height: 36px;
   padding: 0 10px;
@@ -168,6 +171,7 @@
   text-decoration: none;
   opacity: 1;
   visibility: visible;
+  box-sizing: border-box;
 }
 
 .supreme-grid-area .pagination__item:hover {
