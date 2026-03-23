@@ -670,7 +670,7 @@
 </div>
 <script>
 (function(){
-  var DELAY=4000,COOKIE='ov_popup_seen';
+  var DELAY=10000,COOKIE='ov_popup_seen';
   function getCk(n){return document.cookie.split(';').some(function(c){return c.trim().startsWith(n+'=')});}
   function setCk(n,d){var e=new Date();e.setDate(e.getDate()+d);document.cookie=n+'=1;expires='+e.toUTCString()+';path=/;SameSite=Lax';}
   if(getCk(COOKIE))return;
