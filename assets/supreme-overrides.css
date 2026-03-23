@@ -537,7 +537,11 @@ footer a:hover { text-decoration: underline !important; }
 
 /* ── Pagination ───────────────────────────────────────────── */
 .pagination {
-  display: none !important;
+  display: flex;
+}
+
+.supreme-grid-area .pagination {
+  display: block !important;
 }
 
 /* ── Remove all borders, cards, gradients ────────────────── */
