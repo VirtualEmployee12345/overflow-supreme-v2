@@ -384,10 +384,12 @@
 
   hotspots.forEach(function(hs) {
     var zone = document.createElement('a');
+    var x = typeof hs.x !== 'undefined' ? hs.x : hs.left;
+    var y = typeof hs.y !== 'undefined' ? hs.y : hs.top;
     zone.className  = 'cdp-hotspot-zone';
     zone.href       = '/products/' + hs.handle;
-    zone.style.left = hs.left + '%';
-    zone.style.top  = hs.top  + '%';
+    zone.style.left = x + '%';
+    zone.style.top  = y + '%';
     zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
 
     var label = document.createElement('span');
