@@ -233,14 +233,18 @@
       if (!Array.isArray(hotspots) || hotspots.length === 0) return;
 
       hotspots.forEach(function(hs) {
+        var left = (typeof hs.left !== 'undefined' && hs.left !== null) ? hs.left : hs.x;
+        var top  = (typeof hs.top  !== 'undefined' && hs.top  !== null) ? hs.top  : hs.y;
+        if (typeof left === 'undefined' || typeof top === 'undefined') return;
+
         var zone = document.createElement('a');
         zone.className = 'phs-hotspot-zone';
         if (hs.handle === currentHandle) {
           zone.className += ' phs-hotspot-zone--current';
         }
         zone.href       = '/products/' + hs.handle;
-        zone.style.left = hs.left + '%';
-        zone.style.top  = hs.top  + '%';
+        zone.style.left = left + '%';
+        zone.style.top  = top  + '%';
         zone.setAttribute('aria-label', hs.title + ' — ' + hs.price);
 
         var label = document.createElement('span');
